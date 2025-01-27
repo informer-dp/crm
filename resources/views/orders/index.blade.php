@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container">
     <h1>Замовлення</h1>
+    <a href="{{ route('orders.create') }}" class="btn btn-warning btn-sm">Створити</a>
 
     <!-- Фільтри -->
     <form action="{{ route('orders.index') }}" method="GET" class="mb-4">
@@ -15,9 +17,16 @@
                     <option value="Cancelled">Скасовано</option>
                 </select>
             </div>
-            <div class="col">
-                <input type="date" name="date" class="form-control" placeholder="Дата">
-            </div>
+            <div class="form-row">
+        <div class="col">
+            <label for="start_date">Початкова дата</label>
+            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
+        </div>
+        <div class="col">
+            <label for="end_date">Кінцева дата</label>
+            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
+        </div>
+    </div>
             <div class="col">
                 <button type="submit" class="btn btn-primary">Застосувати фільтри</button>
             </div>
@@ -48,7 +57,8 @@
                     <td>{{ $order->created_at->format('d.m.Y') }}</td>
                     <td>
                         <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm">Деталі</a>
-                        <a href="#" class="btn btn-warning btn-sm">Редагувати</a>
+                        <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-warning btn-sm">Редагувати</a>
+
                     </td>
                 </tr>
             @endforeach
@@ -57,4 +67,5 @@
 
     <!-- Пагінація -->
     {{ $orders->links() }}
+</div>
 @endsection

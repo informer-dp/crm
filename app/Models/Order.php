@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role;
+
 
 class Order extends Model
 {
@@ -11,13 +13,18 @@ class Order extends Model
 
     protected $fillable = [
         'client_id', 
-        'device_type', 
+        'device_id', 
         'device_brand', 
         'device_model', 
         'serial_number', 
         'problem_description', 
         'status'
     ];
+
+    protected $attributes = [
+        'status' => 'Прийняте',
+    ];
+    
 
     public function client()
     {

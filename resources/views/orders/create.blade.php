@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container">
     <h1>Створити нове замовлення</h1>
 
     <form action="{{ route('orders.store') }}" method="POST">
@@ -11,20 +12,21 @@
                 <option value="{{ $client->id }}">{{ $client->name }}</option>
             @endforeach
         </select>
-        <div class="form-group">
-    <label for="device_type">Тип пристрою</label>
-    <select name="device_type" id="device_type" class="form-control" required>
-        <option value="" disabled selected>Оберіть тип пристрою</option>
-        <option value="Смартфон">Смартфон</option>
-        <option value="Ноутбук">Ноутбук</option>
-        <option value="Планшет">Планшет</option>
-        <option value="ПК">ПК</option>
-        <option value="Електронна книга">Електронна книга</option>
-        <option value="Навушники">Навушники</option>
-        <option value="Портативна колонка">Портативна колонка</option>
-        <option value="Інше">Інше</option>
-    </select>
-</div>
+        <div class="mb-3">
+            <label for="device_id" class="form-label">Тип пристрою</label>
+            <select name="device_id" id="device_id" class="form-select @error('device_id') is-invalid @enderror">
+                <option value="" selected>Оберіть пристрій</option>
+                @foreach ($devices as $device)
+                    <option value="{{ $device->id }}" {{ isset($order) && $order->device_id == $device->id ? 'selected' : '' }}>
+                        {{ $device->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('device_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
         <label for="device_brand">Бренд пристрою</label>
         <input type="text" name="device_brand" id="device_brand" required>
 
@@ -33,7 +35,10 @@
 
         <label for="problem_description">Опис проблеми</label>
         <textarea name="problem_description" id="problem_description"></textarea>
+        <input type="hidden" name="status" value="Прийняте">
+
 
         <button type="submit">Створити замовлення</button>
     </form>
+</div>
 @endsection

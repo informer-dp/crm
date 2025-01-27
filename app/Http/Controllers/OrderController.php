@@ -6,6 +6,10 @@ use App\Models\Order;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use App\Models\OrderEstimation;
+use Carbon\Carbon; // Для роботи з датами
+use Spatie\Permission\Models\Role;
+use App\Models\User;
+use App\Models\Device;
 
 class OrderController extends Controller
 {
@@ -26,8 +30,12 @@ public function index(Request $request)
     }
 
     // Додаємо фільтрацію за датою, якщо вказано
-    if ($date) {
-        $query->whereDate('created_at', $date);
+    // Фільтрація за періодом
+    if ($request->filled('start_date') && $request->filled('end_date')) {
+        $startDate = Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
+        $endDate = Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
+
+        $query->whereBetween('created_at', [$startDate, $endDate]);
     }
 
     // Виконуємо запит
@@ -39,14 +47,15 @@ public function index(Request $request)
 
     public function create()
     {
-        return view('orders.create', ['clients' => Client::all()]);
+        //$devices = Device::all(); // Отримати всі доступні пристрої
+        return view('orders.create', ['clients' => Client::all(),'devices' => Device::all()]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'device_type' => 'required|string|in:Смартфон,Ноутбук,Планшет,ПК,Електронна книга,Навушники,Портативна колонка,Інше',
+            'device_id' => 'required|exists:devices,id', // Перевірка, що поле обов’язкове і значення існує в таблиці devices
             'device_brand' => 'required|string|max:255',
             'device_model' => 'required|string|max:255',
             'problem_description' => 'required|string',
@@ -64,14 +73,38 @@ public function show($id)
     return view('orders.show', compact('order'));
 }
 
+public function edit(Order $order)
+{
+    // Отримання клієнтів для випадаючого списку
+    $clients = Client::all();
+    $devices = Device::all(); 
+    return view('orders.edit', compact('order', 'clients','devices'));
+}
+public function update(Request $request, Order $order)
+{
+    $request->validate([
+        'client_id' => 'required|exists:clients,id',
+        'device_id' => 'required|exists:devices,id', // Перевірка, що поле обов’язкове і значення існує в таблиці devices
+        'device_model' => 'required|string|max:255',
+        'problem_description' => 'required|string|max:1000',
+        'status' => 'required|string|in:Прийняте,Поставлене в роботу,Діагностика,Узгодження з клієнтом,Очікування деталей,Ремонт,Готове,Видане,Скасоване,Архівне',
+        'price' => 'nullable|numeric|min:0',
+    ]);
+
+    $order->update($request->all());
+
+    return redirect()->route('orders.show', $order->id)->with('success', 'Замовлення оновлено.');
+}
+
 public function updateStatus(Request $request, $id)
 {
     $order = Order::findOrFail($id);
     $request->validate([
-        'status' => 'required|string',
+       'status' => 'required|string|in:Прийняте,Поставлене в роботу,Діагностика,Узгодження з клієнтом,Очікування деталей,Ремонт,Готове,Видане,Скасоване,Архівне'
     ]);
     $order->status = $request->input('status');
     $order->save();
+    $order->update(['status' => $request->status]);
 
     return redirect()->back()->with('success', 'Статус замовлення оновлено.');
 }
@@ -126,3 +159,10 @@ public function destroyEstimation($estimationId)
 
 
 }
+
+/*if (auth()->check()) {
+    // Користувач має роль Admin
+} else {
+    abort(403, 'У вас немає доступу до цієї сторінки.');
+}
+*/

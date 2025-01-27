@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container">
     <h1>Клієнти</h1>
     <a href="{{ route('clients.create') }}">Додати нового клієнта</a>
-    <table>
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Ім'я</th>
@@ -32,4 +33,5 @@
             @endforeach
         </tbody>
     </table>
+</diV>
 @endsection

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container">
     <h1>Створити нового клієнта</h1>
 
     <form action="{{ route('clients.store') }}" method="POST">
@@ -19,4 +20,5 @@
 
         <button type="submit">Створити клієнта</button>
     </form>
+</div>
 @endsection

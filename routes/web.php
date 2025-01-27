@@ -5,6 +5,12 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\WorkTypeController;
+use App\Http\Controllers\DeviceController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -17,12 +23,11 @@ use App\Http\Controllers\EmployeeController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Auth::routes();
+Route::get('/', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
+Route::get('/orders', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
 Route::resource('clients', ClientController::class);
-Route::resource('orders', OrderController::class);
+//Route::resource('orders', OrderController::class);
 Route::resource('parts', PartController::class);
 Route::resource('employees', EmployeeController::class);
 Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
@@ -32,3 +37,31 @@ Route::patch('/orders/estimations/{estimation}', [OrderController::class, 'updat
 
 // Видалення елемента кошторису
 Route::delete('/orders/estimations/{estimation}', [OrderController::class, 'destroyEstimation'])->name('orders.estimations.destroy');
+// Відображення форми редагування замовлення
+Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+
+// Оновлення даних замовлення
+Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+
+
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/admin', [AdminController::class, 'index']);
+});
+
+Route::group(['middleware' => ['auth', 'role:admin|manager|engineer']], function () {
+    Route::resource('/orders', OrderController::class);
+});
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+});
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+// Роут для довідника Пристрої
+Route::resource('devices', DeviceController::class)->middleware('auth');
+
+// Роут для довідника Типи робіт
+Route::resource('work-types', WorkTypeController::class)->middleware('auth');

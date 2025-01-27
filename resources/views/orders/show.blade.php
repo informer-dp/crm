@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container">
     <h1>Замовлення #{{ $order->id }}</h1>
 
     <div class="mb-3">
@@ -25,20 +26,29 @@
 
     <a href="{{ route('orders.index') }}" class="btn btn-secondary">Назад</a>
 
-    <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="mb-3">
+    <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST">
     @csrf
     @method('PATCH')
+
     <div class="form-group">
-        <label for="status">Статус замовлення:</label>
+        <label for="status">Статус замовлення</label>
         <select name="status" id="status" class="form-control">
-            <option value="Pending" {{ $order->status == 'Pending' ? 'selected' : '' }}>Очікує</option>
-            <option value="In Progress" {{ $order->status == 'In Progress' ? 'selected' : '' }}>В роботі</option>
-            <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>Виконано</option>
-            <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Скасовано</option>
+            <option value="Прийняте" {{ $order->status == 'Прийняте' ? 'selected' : '' }}>Прийняте</option>
+            <option value="Поставлене в роботу" {{ $order->status == 'Поставлене в роботу' ? 'selected' : '' }}>Поставлене в роботу</option>
+            <option value="Діагностика" {{ $order->status == 'Діагностика' ? 'selected' : '' }}>Діагностика</option>
+            <option value="Узгодження з клієнтом" {{ $order->status == 'Узгодження з клієнтом' ? 'selected' : '' }}>Узгодження з клієнтом</option>
+            <option value="Очікування деталей" {{ $order->status == 'Очікування деталей' ? 'selected' : '' }}>Очікування деталей</option>
+            <option value="Ремонт" {{ $order->status == 'Ремонт' ? 'selected' : '' }}>Ремонт</option>
+            <option value="Готове" {{ $order->status == 'Готове' ? 'selected' : '' }}>Готове</option>
+            <option value="Видане" {{ $order->status == 'Видане' ? 'selected' : '' }}>Видане</option>
+            <option value="Скасоване" {{ $order->status == 'Скасоване' ? 'selected' : '' }}>Скасоване</option>
+            <option value="Архівне" {{ $order->status == 'Архівне' ? 'selected' : '' }}>Архівне</option>
         </select>
     </div>
-    <button type="submit" class="btn btn-primary">Оновити статус</button>
+
+    <button type="submit" class="btn btn-primary mt-3">Оновити статус</button>
 </form>
+
 
 <h3>Кошторис</h3>
 
@@ -98,7 +108,7 @@
             <td>
                     <input type="number" step="0.01" name="price_per_unit" class="form-control" value="{{ $estimation->price_per_unit }}" required>
             </td>
-            <td>
+            <td style="text-align: right;">
                 {{ $estimation->quantity * $estimation->price_per_unit }} грн
             </td>
             <td>
@@ -115,5 +125,5 @@
         </tr>
     @endforeach
 </tbody>
-
+</div>
 @endsection

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
-            $table->string('device_type');
+            $table->foreignId('device_id')->constrained('devices')->onDelete('cascade');
             $table->string('device_brand');
             $table->string('device_model');
             $table->string('serial_number')->nullable();
