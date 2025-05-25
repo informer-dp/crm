@@ -11,13 +11,13 @@ class WorkTypeController extends Controller
     public function index()
     {
         $workTypes = WorkType::with('device')->get();
-        return view('work-types.index', compact('workTypes'));
+        return view('work_types.index', compact('workTypes'));
     }
 
     public function create()
     {
         $devices = Device::all();
-        return view('work-types.create', compact('devices'));
+        return view('work_types.create', compact('devices'));
     }
 
     public function store(Request $request)
@@ -29,13 +29,13 @@ class WorkTypeController extends Controller
 
         WorkType::create($request->all());
 
-        return redirect()->route('work-types.index')->with('success', 'Тип роботи успішно створено.');
+        return redirect()->route('work_types.index')->with('success', 'Тип роботи успішно створено.');
     }
 
     public function edit(WorkType $workType)
     {
         $devices = Device::all();
-        return view('work-types.edit', compact('workType', 'devices'));
+        return view('work_types.edit', compact('workType', 'devices'));
     }
 
     public function update(Request $request, WorkType $workType)
@@ -47,13 +47,13 @@ class WorkTypeController extends Controller
 
         $workType->update($request->all());
 
-        return redirect()->route('work-types.index')->with('success', 'Тип роботи успішно оновлено.');
+        return redirect()->route('work_types.index')->with('success', 'Тип роботи успішно оновлено.');
     }
 
     public function destroy(WorkType $workType)
     {
         $workType->delete();
 
-        return redirect()->route('work-types.index')->with('success', 'Тип роботи успішно видалено.');
+        return redirect()->route('work_types.index')->with('success', 'Тип роботи успішно видалено.');
     }
 }

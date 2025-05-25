@@ -42,7 +42,7 @@
                     <ul class="dropdown-menu" aria-labelledby="referenceDropdown">
                         <li><a class="dropdown-item" href="{{ route('clients.index') }}">Клієнти</a></li>
                         <li><a class="dropdown-item" href="{{ route('devices.index') }}">Пристрої</a></li>
-                        <li><a class="dropdown-item" href="{{ route('work-types.index') }}">Типи робіт</a></li>
+                        <li><a class="dropdown-item" href="{{ route('work_types.index') }}">Типи робіт</a></li>
                     </ul>
                 </li>
             </ul>

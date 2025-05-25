@@ -64,4 +64,4 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::resource('devices', DeviceController::class)->middleware('auth');
 
 // Роут для довідника Типи робіт
-Route::resource('work-types', WorkTypeController::class)->middleware('auth');
+Route::resource('work_types', WorkTypeController::class)->middleware('auth');

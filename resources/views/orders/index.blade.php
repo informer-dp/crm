@@ -2,13 +2,13 @@
 
 @section('content')
 <div class="container">
-    <h1>Замовлення</h1>
-    <a href="{{ route('orders.create') }}" class="btn btn-warning btn-sm">Створити</a>
+    <h1 class="border-bottom border-gray">Замовлення   <a href="{{ route('orders.create') }}" class="btn btn-warning btn-sm">Створити</a></h1>
 
     <!-- Фільтри -->
-    <form action="{{ route('orders.index') }}" method="GET" class="mb-4">
-        <div class="form-row">
+    <form action="{{ route('orders.index') }}" method="GET" class="mb-4 p-2 border border-primary">
+        <div class="row">
             <div class="col">
+            <label for="status">Статус</label>
                 <select name="status" class="form-control">
                     <option value="">Всі статуси</option>
                     <option value="Pending">Очікує</option>
@@ -17,7 +17,6 @@
                     <option value="Cancelled">Скасовано</option>
                 </select>
             </div>
-            <div class="form-row">
         <div class="col">
             <label for="start_date">Початкова дата</label>
             <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
@@ -26,7 +25,6 @@
             <label for="end_date">Кінцева дата</label>
             <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
         </div>
-    </div>
             <div class="col">
                 <button type="submit" class="btn btn-primary">Застосувати фільтри</button>
             </div>

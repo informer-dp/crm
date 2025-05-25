@@ -13,7 +13,7 @@
 
     {{-- Кнопка для створення нового типу роботи --}}
     <div class="mb-3">
-        <a href="{{ route('work-types.create') }}" class="btn btn-primary">Додати тип роботи</a>
+        <a href="{{ route('work_types.create') }}" class="btn btn-primary">Додати тип роботи</a>
     </div>
 
     {{-- Таблиця зі списком типів робіт --}}
@@ -35,9 +35,9 @@
                     <td>{{ $workType->device->name ?? 'Не вказано' }}</td>
                     <td>
                         {{-- Кнопки редагування та видалення --}}
-                        <a href="{{ route('work-types.edit', $workType->id) }}" class="btn btn-warning btn-sm">Редагувати</a>
+                        <a href="{{ route('work_types.edit', $workType->id) }}" class="btn btn-warning btn-sm">Редагувати</a>
 
-                        <form action="{{ route('work-types.destroy', $workType->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('work_types.destroy', $workType->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити цей тип роботи?')">Видалити</button>
