@@ -23,7 +23,7 @@ use App\Http\Controllers\DeviceController;
 |
 */
 
-Auth::routes();
+Auth::routes(['register' => false]);
 Route::get('/', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
 Route::get('/orders', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
 Route::resource('clients', ClientController::class);
