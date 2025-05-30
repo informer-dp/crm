@@ -57,8 +57,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
 });
-Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
 
 // Роут для довідника Пристрої
 Route::resource('devices', DeviceController::class)->middleware('auth');
