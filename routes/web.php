@@ -26,7 +26,7 @@ use App\Http\Controllers\DeviceController;
 Auth::routes(['register' => false]);
 Route::get('/', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
 Route::get('/orders', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
-Route::resource('clients', ClientController::class);
+Route::resource('clients', ClientController::class)->middleware('auth');
 //Route::resource('orders', OrderController::class);
 Route::resource('parts', PartController::class);
 Route::resource('employees', EmployeeController::class);
@@ -58,6 +58,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
 });
 
 
@@ -66,3 +67,6 @@ Route::resource('devices', DeviceController::class)->middleware('auth');
 
 // Роут для довідника Типи робіт
 Route::resource('work_types', WorkTypeController::class)->middleware('auth');
+
+// Роут для довідника Клієнти
+Route::resource('clients', ClientController::class)->middleware('auth');

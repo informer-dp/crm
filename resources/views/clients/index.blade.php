@@ -3,7 +3,9 @@
 @section('content')
 <div class="container">
     <h1>Клієнти</h1>
-    <a href="{{ route('clients.create') }}">Додати нового клієнта</a>
+    <div class="mb-3">
+    <a href="{{ route('clients.create') }}" class="btn btn-primary">Додати нового клієнта</a>
+</div>
     <table class="table table-bordered">
         <thead>
             <tr>
