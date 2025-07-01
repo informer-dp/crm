@@ -43,6 +43,7 @@
                         <li><a class="dropdown-item" href="{{ route('clients.index') }}">Клієнти</a></li>
                         <li><a class="dropdown-item" href="{{ route('devices.index') }}">Пристрої</a></li>
                         <li><a class="dropdown-item" href="{{ route('work_types.index') }}">Типи робіт</a></li>
+                        <li><a class="dropdown-item" href="{{ route('brands.index') }}">Бренди</a></li>
                     </ul>
                 </li>
             </ul>

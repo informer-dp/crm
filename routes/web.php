@@ -70,3 +70,6 @@ Route::resource('work_types', WorkTypeController::class)->middleware('auth');
 
 // Роут для довідника Клієнти
 Route::resource('clients', ClientController::class)->middleware('auth');
+
+//РОут для довідника "Бренди" 
+Route::resource('brands', BrandController::class)->middleware('auth');
