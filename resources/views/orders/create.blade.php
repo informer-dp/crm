@@ -27,8 +27,12 @@
             @enderror
         </div>
 
-        <label for="device_brand">Бренд пристрою</label>
-        <input type="text" name="device_brand" id="device_brand" required>
+        <label>Бренд</label>
+        <select name="brand_id" class="form-control">
+        @foreach($brands as $brand)
+            <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+        @endforeach
+        </select>
 
         <label for="device_model">Модель пристрою</label>
         <input type="text" name="device_model" id="device_model" required>

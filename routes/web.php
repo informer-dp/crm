@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\WorkTypeController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\BrandController;
 
 
 /*
@@ -23,7 +24,7 @@ use App\Http\Controllers\DeviceController;
 |
 */
 
-Auth::routes(['register' => false]);
+Auth::routes(['register' => true]);
 Route::get('/', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
 Route::get('/orders', [OrderController::class, 'index'])->middleware(['auth', 'role:admin'])->name('orders.index');
 Route::resource('clients', ClientController::class)->middleware('auth');
