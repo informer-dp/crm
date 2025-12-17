@@ -32,6 +32,7 @@ class DeviceController extends Controller
         $request->validate([
             'name' => 'required|unique:devices,name|max:255',
             'description' => 'nullable|string',
+            'brand_id' => 'nullable|exists:brands,id',
         ]);
     
         Device::create($request->all());
@@ -56,6 +57,7 @@ class DeviceController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'brand_id' => 'nullable|exists:brands,id',
         ]);
 
         $device = Device::findOrFail($id);

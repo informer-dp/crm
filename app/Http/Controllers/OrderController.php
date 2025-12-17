@@ -10,6 +10,7 @@ use Carbon\Carbon; // Для роботи з датами
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 use App\Models\Device;
+use App\Models\Brand;
 
 class OrderController extends Controller
 {
@@ -48,7 +49,11 @@ public function index(Request $request)
     public function create()
     {
         //$devices = Device::all(); // Отримати всі доступні пристрої
-        return view('orders.create', ['clients' => Client::all(),'devices' => Device::all()]);
+        return view('orders.create', ['clients' => Client::all(),'devices' => Device::all(),'brands' => Brand::all()]);
+       // $devices = Device::all();
+       // $brands = Brand::all();
+       // return view('orders.create', compact('devices', 'brands'));
+        
     }
 
     public function store(Request $request)
