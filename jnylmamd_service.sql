@@ -2,9 +2,9 @@
 -- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Хост: localhost:3306
--- Час створення: Жов 28 2025 р., 21:49
--- Версія сервера: 10.6.23-MariaDB-cll-lve
+-- Хост: MariaDB-10.5:3306
+-- Час створення: Гру 19 2025 р., 00:48
+-- Версія сервера: 10.5.29-MariaDB
 -- Версія PHP: 8.4.13
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
