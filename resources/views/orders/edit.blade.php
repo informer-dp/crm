@@ -9,15 +9,16 @@
         @method('PUT')
 
         <div class="form-group">
-            <label for="client_id">Клієнт</label>
-            <select name="client_id" id="client_id" class="form-control">
-                @foreach ($clients as $client)
-                    <option value="{{ $client->id }}" {{ $client->id == $order->client_id ? 'selected' : '' }}>
-                        {{ $client->name }}
+           
+        <select name="counterparty_id" class="form-control">
+        @foreach($counterparties as $c)
+        <!-- <option value="{{ $c->id }}">{{ $c->name }}</option> -->
+                    <option value="{{ $c->id }}"
+                        {{ request('counterparty_id') == $c->id ? 'selected' : '' }}>
+                        {{ $c->contact->name ?? 'Без імені' }}
                     </option>
-                @endforeach
-            </select>
-        </div>
+        @endforeach
+        </select>
 
         <div class="mb-3">
             <label for="device_id" class="form-label">Тип пристрою</label>
@@ -45,8 +46,8 @@
         </div>
 
         <div class="form-group">
-            <label for="price">Вартість</label>
-            <input type="number" name="price" id="price" class="form-control" step="0.01" value="{{ $order->price }}">
+            <!-- <label for="price">Вартість</label>
+            <input type="number" name="price" id="price" class="form-control" step="0.01" value="{{ $order->price }}"> -->
         </div>
 
         <button type="submit" class="btn btn-primary">Зберегти</button>

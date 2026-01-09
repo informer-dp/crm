@@ -41,6 +41,8 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="referenceDropdown">
                         <li><a class="dropdown-item" href="{{ route('clients.index') }}">Клієнти</a></li>
+                        <li><a class="dropdown-item" href="{{ route('contacts.index') }}">Контакти</a></li>
+                        <li><a class="dropdown-item" href="{{ route('counterparties.index') }}">Контрагенти</a></li>
                         <li><a class="dropdown-item" href="{{ route('devices.index') }}">Пристрої</a></li>
                         <li><a class="dropdown-item" href="{{ route('work_types.index') }}">Типи робіт</a></li>
                         <li><a class="dropdown-item" href="{{ route('brands.index') }}">Бренди</a></li>

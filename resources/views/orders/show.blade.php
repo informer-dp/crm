@@ -2,197 +2,155 @@
 
 @section('content')
 <div class="container">
-    <h1>Замовлення #{{ $order->id }}</h1>
 
-    <div class="mb-3">
-        <h3>Інформація про клієнта</h3>
-        <p><strong>Ім'я:</strong> {{ $order->client->name }}</p>
-        <p><strong>Телефон:</strong> {{ $order->client->phone }}</p>
-        <p><strong>Email:</strong> {{ $order->client->email }}</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>
+            Замовлення #{{ $order->id }}
+        </h4>
+        <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
+                Редагувати
+        </a>
+        <a href="{{ route('orders.index') }}" class="btn btn-secondary">
+            ← До списку
+        </a>
     </div>
 
-    <div class="mb-3">
-        <h3>Інформація про пристрій</h3>
-        <p><strong>Тип:</strong> {{ $order->device_type }}</p>
-        <p><strong>Бренд:</strong> {{ $order->device_brand }}</p>
-        <p><strong>Модель:</strong> {{ $order->device_model }}</p>
-        <p><strong>Опис проблеми:</strong> {{ $order->problem_description }}</p>
-    </div>
+    {{-- Вкладки --}}
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-main">
+                Основна інформація
+            </button>
+        </li>
 
-    <div class="mb-3">
-        <h3>Статус замовлення</h3>
-        <p>{{ $order->status }}</p>
-    </div>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-estimate">
+                Кошторис
+            </button>
+        </li>
 
-    <a href="{{ route('orders.index') }}" class="btn btn-secondary">Назад</a>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tasks">
+                Завдання
+            </button>
+        </li>
 
-<!--Offcanvas "ORDER STATUS CHANGE" start-->
-<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#orderStatusChange" aria-controls="orderStatusChange">
-  Оновити статус
-</button>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
+                Активності
+            </button>
+        </li>
 
-<div class="offcanvas offcanvas-end border-start border-5 border-primary" tabindex="-1" id="orderStatusChange" aria-labelledby="orderStatusChangeLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title border-bottom border-gray" id="orderStatusChangeLabel">Оновити статус замовлення</h5><hr>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <!--Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.-->
-      <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST">
-    @csrf
-    @method('PATCH')
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-payments">
+                Рух коштів
+            </button>
+        </li>
+    </ul>
 
-    <div class="form-group">
-        <label for="status">Новий статус замовлення</label><br/>
-        <select name="status" id="status" class="form-control">
-            <option value="Прийняте" {{ $order->status == 'Прийняте' ? 'selected' : '' }}>Прийняте</option>
-            <option value="Поставлене в роботу" {{ $order->status == 'Поставлене в роботу' ? 'selected' : '' }}>Поставлене в роботу</option>
-            <option value="Діагностика" {{ $order->status == 'Діагностика' ? 'selected' : '' }}>Діагностика</option>
-            <option value="Узгодження з клієнтом" {{ $order->status == 'Узгодження з клієнтом' ? 'selected' : '' }}>Узгодження з клієнтом</option>
-            <option value="Очікування деталей" {{ $order->status == 'Очікування деталей' ? 'selected' : '' }}>Очікування деталей</option>
-            <option value="Ремонт" {{ $order->status == 'Ремонт' ? 'selected' : '' }}>Ремонт</option>
-            <option value="Готове" {{ $order->status == 'Готове' ? 'selected' : '' }}>Готове</option>
-            <option value="Видане" {{ $order->status == 'Видане' ? 'selected' : '' }}>Видане</option>
-            <option value="Скасоване" {{ $order->status == 'Скасоване' ? 'selected' : '' }}>Скасоване</option>
-            <option value="Архівне" {{ $order->status == 'Архівне' ? 'selected' : '' }}>Архівне</option>
-        </select>
-    </div>
+    <div class="tab-content">
 
-    <button type="submit" class="btn btn-primary mt-3">Оновити статус</button>
-</form>
-    </div>
-  </div>
-</div>
-<!--Offcanvas "ORDER STATUS CHANGE" end-->
-    
+        {{-- ================= Основна інформація ================= --}}
+        <div class="tab-pane fade show active" id="tab-main">
 
-<div class="card m-3 border-5">
-    <div class="card-body">
-<h3>Кошторис</h3>
+            <div class="card">
+                <div class="card-body">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Назва</th>
-            <th>Кількість</th>
-            <th>Ціна за одиницю</th>
-            <th>Всього</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($order->estimations as $estimation)
-            <tr>
-                <td>{{ $estimation->item_name }}</td>
-                <td>{{ $estimation->quantity }}</td>
-                <td>{{ $estimation->price_per_unit }} грн</td>
-                <td>{{ $estimation->quantity * $estimation->price_per_unit }} грн</td>
-            </tr>
-        @endforeach
-    </tbody>
-</table>
+                    <h5>Клієнт</h5>
+                    <p>
+                        <strong>{{ $order->counterparty?->contact?->name ?? '—' }}</strong><br>
+                        {{ $order->counterparty?->contact?->phone ?? '' }}<br>
+                        {{ $order->counterparty?->contact?->email ?? '' }}
+                    </p>
 
-<h4>Загальна вартість: 
-    {{ $order->estimations->sum(fn($item) => $item->quantity * $item->price_per_unit) }} грн
-</h4>
-</div>
-</div>
-<!--Offcanvas "ORDER ESTIMATION STORE" start-->
+                    <hr>
 
-<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#orderEstimationStore" aria-controls="orderEstimationStore">
-  Додати позицію в кошторис
-</button>
+                    <h5>Пристрій</h5>
 
-<div class="offcanvas offcanvas-end border-start border-5 border-primary" tabindex="-1" id="orderEstimationStore" aria-labelledby="orderEstimationUpdateLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title border-bottom border-2 border-gray" id="orderEstimationUpdateLabel"><strong>Додати позицію в кошторис</strong></h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <!--Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.-->
-      <form action="{{ route('orders.estimations.store', $order->id) }}" method="POST" class="mt-4">
-    @csrf
-    <div class="form-group">
-        <label for="item_name">Назва:</label>
-        <input type="text" name="item_name" id="item_name" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="quantity">Кількість:</label>
-        <input type="number" name="quantity" id="quantity" class="form-control" value="1" required>
-    </div>
-    <div class="form-group">
-        <label for="price_per_unit">Ціна за одиницю:</label>
-        <input type="number" step="0.01" name="price_per_unit" id="price_per_unit" class="form-control" required>
-    </div><br/><br/>
-    <button type="submit" class="btn btn-primary ">Додати в кошторис</button>
-</form>
-    </div>
-  </div>
-</div>
-<!--Offcanvas "ORDER ESTIMATION STORE" end-->
-<!--Offcanvas "ORDER ESTIMATION UPDATE" start-->
+                    <p>
+                        Тип: {{ $order->device?->name ?? '—' }}<br>
+                        Бренд: {{ $order->brand?->name }}<br>
+                        Модель: {{ $order->device_model }}<br>
+                        Серійний номер: {{ $order->serial_number ?? '—' }}
+                    </p>
 
-<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#orderEstimationUpdate" aria-controls="orderEstimationUpdate">
-  Редагувати кошторис
-</button>
+                    <hr>
 
-<div class="offcanvas offcanvas-end border-start border-5 border-primary w-auto" tabindex="-1" id="orderEstimationUpdate" aria-labelledby="orderEstimationUpdateLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="orderEstimationUpdateLabel">Редагування кошторису замовлення</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      <!--Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.-->
-      <div>
-    @foreach ($order->estimations as $estimation)
-    <div class="card mb-3">
-        <div class="card-body bg-secondary-subtle">
-        <div class="row mb-3">
-            <div class="col">
-                <form action="{{ route('orders.estimations.update', $estimation->id) }}" method="POST" class="form-floating">
-                    @csrf
-                    @method('PATCH')
-                    <input type="text" name="item_name" class="form-control" value="{{ $estimation->item_name }}" required>
-                    <label for="item_name">Назва позиції</label>
+                    <h5>Статус</h5>
+                    <!-- <span class="badge bg-primary">
+                        {{ $order->status }}
+                    </span> -->
+                        <form method="POST" action="{{ route('orders.updateStatus', $order) }}">
+                            @csrf
+                            @method('PATCH')
+
+                            <select name="status_id" class="form-control" required>
+                                @foreach($statuses as $status)
+                                    <option value="{{ $status->id }}"
+                                        {{ $order->status_id == $status->id ? 'selected' : '' }}>
+                                        {{ $status->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <button class="btn btn-primary mt-2">Оновити статус</button>
+                        </form>
+
+                    <hr>
+
+                    <h5>Проблема</h5>
+                    <div class="border rounded p-2">
+                        {!! nl2br(e($order->problem_description)) !!}
+                    </div>
+
+                </div>
             </div>
-</div>
-<div class="row mb-3">
-            <div class="input-group mb-3">
-                 <span class="input-group-text">Кількість</span>
-                    <input size="5" type="number" name="quantity" class="form-control" value="{{ $estimation->quantity }}" required>
-                    <span class="input-group-text">шт.</span>
-            </div>
-            <div class="input-group mb-3">
-                    <span class="input-group-text">Ціна</span>
-                    <input type="number" step="0.01" name="price_per_unit" class="form-control" value="{{ $estimation->price_per_unit }}" required>
-                    <span class="input-group-text">грн.</span>
-            </div>
-            <!--<div class="col-auto" style="text-align: right;">
-                {{ $estimation->quantity * $estimation->price_per_unit }} грн
-            </div>-->
-            <div class="col-auto">
-                    <button type="submit" class="btn btn-success btn-sm">Оновити</button>
-                </form>
-            </div>
-            <div class="col-auto">
-                <form action="{{ route('orders.estimations.destroy', $estimation->id) }}" method="POST" onsubmit="return confirm('Ви впевнені, що хочете видалити цей елемент?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
-                </form>
         </div>
-</div>
-</div>
-</div>
-    @endforeach
-</div>
+
+        {{-- ================= Кошторис ================= --}}
+        <div class="tab-pane fade" id="tab-estimate">
+            @include('orders.partials.estimation')
+        </div>
+
+        {{-- ================= Завдання ================= --}}
+        <div class="tab-pane fade" id="tab-tasks">
+            <div class="alert alert-info">
+                Розділ "Завдання" буде реалізовано після затвердження Task-модуля.
+            </div>
+        </div>
+
+        {{-- ================= Активності ================= --}}
+        <div class="tab-pane fade" id="tab-activity">
+            <div class="">
+                <ul class="list-group">
+                        @forelse($order->activities as $activity)
+                            <li class="list-group-item">
+                                <strong>
+                                    {{ $activity->user->name ?? 'Система' }}
+                                </strong>
+                                —
+                                {{ $activity->description }}
+
+                                <div class="text-muted small">
+                                    {{ $activity->created_at->format('d.m.Y H:i') }}
+                                </div>
+                            </li>
+                        @empty
+                            <li class="list-group-item text-muted">
+                                Активностей ще немає
+                            </li>
+                        @endforelse
+                    </ul>
+            </div>
+        </div>
+
+        {{-- ================= Платежі ================= --}}
+        <div class="tab-pane fade" id="tab-payments">
+            <div class="alert alert-info">
+                Тут буде рух коштів по замовленню.
+            </div>
+        </div>
 
     </div>
-  </div>
-</div>
-<!--Offcanvas "ORDER ESTIMATION UPDATE" end-->
-
 </div>
 @endsection

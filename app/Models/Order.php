@@ -12,24 +12,34 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'client_id', 
+        'counterparty_id', 
         'device_id', 
-        'device_brand', 
+        'brand_id', 
         'device_model', 
         'serial_number', 
         'problem_description', 
-        'status'
+        'status_id'
     ];
 
     protected $attributes = [
-        'status' => 'Прийняте',
+        'status_id' => 1,
     ];
-    
+    public function counterparty()
+{
+    return $this->belongsTo(Counterparty::class);
+}
+
 
     public function client()
-    {
-        return $this->belongsTo(Client::class);
-    }
+{
+    return $this->belongsTo(Counterparty::class, 'client_id');
+}
+
+public function device()
+{
+    return $this->belongsTo(Device::class);
+}
+
 
     public function parts()
     {
@@ -37,7 +47,7 @@ class Order extends Model
                     ->withPivot('quantity');
     }
 
-    public function estimate()
+    public function estimates()
     {
         return $this->hasOne(Estimate::class);
     }
@@ -48,6 +58,22 @@ class Order extends Model
     }
     public function estimations()
 {
-    return $this->hasMany(OrderEstimation::class);
+    return $this->hasMany(Estimate::class);
 }
+
+public function brand()
+{
+    return $this->belongsTo(\App\Models\Brand::class);
+}
+public function status()
+{
+    return $this->belongsTo(OrderStatus::class);
+}
+public function activities()
+{
+    return $this->morphMany(Activity::class, 'subject')
+        ->latest();
+}
+
+
 }

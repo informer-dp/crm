@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('work_types', function (Blueprint $table) {
-            $table->foreignId('device_id')
-                  ->constrained('devices')
-                  ->cascadeOnDelete();
+        Schema::create('audit_logs', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -23,9 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('work_types', function (Blueprint $table) {
-            $table->dropForeign(['device_id']);
-            $table->dropColumn('device_id');
-        });
+        Schema::dropIfExists('audit_logs');
     }
 };

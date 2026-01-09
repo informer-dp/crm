@@ -9,7 +9,13 @@ class Estimate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_id', 'description', 'part_cost', 'labor_cost', 'total_cost'];
+    protected $fillable = [
+    'description',
+    'part_cost',
+    'labor_cost',
+    'total_cost',
+];
+
 
     public function order()
     {
