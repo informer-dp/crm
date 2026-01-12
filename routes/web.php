@@ -48,18 +48,20 @@ Route::middleware(['auth', 'role:admin|manager|engineer'])->group(function () {
     Route::patch('/orders/estimations/{estimation}', [OrderController::class, 'updateEstimation'])
         ->name('orders.estimations.update');
 
-    Route::delete('/orders/estimations/{estimation}', [OrderController::class, 'destroyEstimation'])
-        ->name('orders.estimations.destroy');
+    Route::delete('/orders/estimations/{estimation}', [OrderController::class, 'destroyEstimation'])->name('orders.estimations.destroy');
+
 });
 
 Route::middleware('auth')->get('/ajax/counterparty/{id}', function ($id) {
     $counterparty = \App\Models\Counterparty::with('contact')->findOrFail($id);
 
-    return response()->json([
-        'phone' => $counterparty->contact->phone,
-        'email' => $counterparty->contact->email,
-    ]);
-})->name('ajax.counterparty');
+            return response()->json([
+                'phone' => $counterparty->contact->phone,
+                'email' => $counterparty->contact->email,
+            ]);
+    })->name('ajax.counterparty');
+    
+Route::get('/contacts/check-phone', [ContactController::class, 'checkPhone']) ->middleware('auth');
 
 Route::middleware('auth')->post('/ajax/create-counterparty', function (\Illuminate\Http\Request $request) {
 

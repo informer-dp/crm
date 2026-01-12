@@ -48,3 +48,16 @@
     </form>
 </div>
 @endsection
+<script>
+$('#phone').on('blur', function () {
+    let phone = $(this).val();
+    if (!phone) return;
+
+    $.get('/contacts/check-phone', { phone }, function (data) {
+        if (data.exists) {
+            alert('Контакт з таким номером вже існує');
+            $('#phone').val('').focus();
+        }
+    });
+});
+</script>

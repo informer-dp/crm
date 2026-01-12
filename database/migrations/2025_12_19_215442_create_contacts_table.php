@@ -19,6 +19,7 @@ return new class extends Migration
     $table->text('address')->nullable();
     $table->text('notes')->nullable();
     $table->timestamps();
+    $table->unique('phone');
 });
 
     }

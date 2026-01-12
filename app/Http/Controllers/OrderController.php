@@ -8,14 +8,14 @@ use App\Models\Counterparty;
 use App\Models\Client;
 use App\Models\CounterpartyGroup;
 use Illuminate\Http\Request;
-use App\Models\OrderEstimation;
+//use App\Models\OrderEstimation;
 use Carbon\Carbon; // Для роботи з датами
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 use App\Models\Device;
 use App\Models\Brand;
 use App\Services\ActivityService;
-
+use App\Models\Estimate;
 
 class OrderController extends Controller
 {
@@ -233,7 +233,11 @@ public function storeEstimation(Request $request, Order $order)
         ($data['part_cost'] ?? 0) + ($data['labor_cost'] ?? 0);
 
     $order->estimations()->create($data);
-    
+    ActivityService::log(
+            $order,
+            'updated',
+            'Додано позицію в кошторис замовлення '
+        );
 
     return back()->with('success', 'Позицію додано');
 }
@@ -250,21 +254,24 @@ public function updateEstimation(Request $request, Estimate $estimation)
     $data['total_cost'] =
         ($data['part_cost'] ?? 0) + ($data['labor_cost'] ?? 0);
 
+    $order=$estimation['order_id'];
     $estimation->update($data);
+        // ActivityService::log(
+        // $order,
+        // 'updated',
+        // 'Оновлено позицію кошторису'
+        // );
 
     return back()->with('success', 'Позицію оновлено');
 }
 
-public function destroyEstimation($estimationId)
+public function destroyEstimation(Estimate $estimation)
 {
-    $estimation = OrderEstimation::findOrFail($estimationId);
-
-    $orderId = $estimation->order_id; // Запам'ятовуємо ID замовлення
-
     $estimation->delete();
 
-    return redirect()->route('orders.show', $orderId)->with('success', 'Елемент кошторису видалено.');
+    return back()->with('success', 'Позицію кошторису видалено');
 }
+
 
 
 }

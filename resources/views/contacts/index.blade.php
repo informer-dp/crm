@@ -6,12 +6,21 @@
         <h3>Контакти</h3>
         <a href="{{ route('contacts.create') }}" class="btn btn-primary">Додати контакт</a>
     </div>
-
+<hr />
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+<div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Контакти</h5>
 
-    <table class="table table-bordered">
+            <a href="{{ route('contacts.create') }}" class="btn btn-primary">
+                + Новий контакт
+            </a>
+        </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
         <thead>
         <tr>
             <th>#</th>
@@ -38,7 +47,10 @@
         @endforelse
         </tbody>
     </table>
-
-    {{ $contacts->links() }}
+</div>
+</div>
+    <div class="card-footer">
+     {{ $contacts->links() }}
+    </div>
 </div>
 @endsection

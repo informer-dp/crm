@@ -24,7 +24,7 @@
                     <th>#</th>
                     <th>Назва</th>
                     <th>Опис</th>
-                    <th>Дії</th>
+                    <!-- <th>Дії</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -33,7 +33,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $device->name }}</td>
                     <td>{{ $device->description ?? 'Немає опису' }}</td>
-                    <td>
+                    <!-- <td>
                         {{-- Кнопки редагування та видалення --}}
                         <a href="{{ route('devices.edit', $device->id) }}" class="btn btn-warning btn-sm">Редагувати</a>
 
@@ -42,7 +42,7 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити цей пристрій?')">Видалити</button>
                         </form>
-                    </td>
+                    </td> -->
                 </tr>
                 @endforeach
             </tbody>

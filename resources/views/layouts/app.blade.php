@@ -15,6 +15,9 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body>
     <div id="app">
@@ -30,25 +33,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     
-                    <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('orders.index') }}">Замовлення</a>
-                </li>
-                <!-- Група "Довідники" -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="referenceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Довідники
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="referenceDropdown">
-                        <li><a class="dropdown-item" href="{{ route('clients.index') }}">Клієнти</a></li>
-                        <li><a class="dropdown-item" href="{{ route('contacts.index') }}">Контакти</a></li>
-                        <li><a class="dropdown-item" href="{{ route('counterparties.index') }}">Контрагенти</a></li>
-                        <li><a class="dropdown-item" href="{{ route('devices.index') }}">Пристрої</a></li>
-                        <li><a class="dropdown-item" href="{{ route('work_types.index') }}">Типи робіт</a></li>
-                        <li><a class="dropdown-item" href="{{ route('brands.index') }}">Бренди</a></li>
-                    </ul>
-                </li>
-            </ul>
+                    
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
                         <!-- Authentication Links -->
@@ -65,9 +50,34 @@
                                 </li>
                             @endif
                         @else
+                        <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('orders.index') }}">Замовлення</a>
+                        </li>
+                <!-- Група "Довідники" -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="referenceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Довідники
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="referenceDropdown">
+                                <!-- <li><a class="dropdown-item" href="{{ route('clients.index') }}">Клієнти</a></li> -->
+                                <li><a class="dropdown-item" href="{{ route('contacts.index') }}">Контакти</a></li>
+                                <li><a class="dropdown-item" href="{{ route('counterparties.index') }}">Контрагенти</a></li>
+                                <li><a class="dropdown-item" href="{{ route('devices.index') }}">Пристрої</a></li>
+                                <!-- <li><a class="dropdown-item" href="{{ route('work_types.index') }}">Типи робіт</a></li> -->
+                                <li><a class="dropdown-item" href="{{ route('brands.index') }}">Бренди</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                             <li class="nav-item dropdown">
+                               
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }}
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                                </svg> |  
+                                
+                                {{ Auth::user()->name }}
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

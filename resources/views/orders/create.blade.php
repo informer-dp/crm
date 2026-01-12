@@ -33,26 +33,38 @@
                     <label class="form-label">Клієнт</label>
                 
                 <div class="d-flex justify-content-between ">            
-                        <button type="button" class="btn btn-sm btn-outline-primary"
+                        <button type="button" class="btn btn-sm btn-primary"
                                 data-bs-toggle="modal" data-bs-target="#createClientModal">
-                            + Новий клієнт
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add" viewBox="0 0 16 16">
+                                <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
+                                <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+                                </svg>
+                           
                         </button>
-                    <select name="counterparty_id" class="form-select @error('counterparty_id') is-invalid @enderror" required>
-                        <option value="">— Оберіть клієнта —</option>
+                    <select name="counterparty_id"
+                            id="counterparty_id"
+                            class="form-select"
+                            required
+                            aria-describedby="counterpartySelectHelp"
+                            >
 
-                        @foreach($counterparties as $c)
-                            <option value="{{ $c->id }}"
-                                {{ old('counterparty_id') == $c->id ? 'selected' : '' }}>
-                                {{ $c->contact->name ?? 'Без імені' }}
+                        <option value="">Оберіть клієнта</option>
+
+                        @foreach($counterparties as $cp)
+                            <option value="{{ $cp->id }}">
+                                {{ $cp->contact->name }}
+                                — {{ $cp->contact->phone }}
                             </option>
                         @endforeach
                     </select>
-                    
-
                     @error('counterparty_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                    <small id="counterpartySelectHelp" class="text-muted form-text">   
+                      Натисніть на кнопку [+] щоб створити нового або почніть вводити номер чи ім'я, щоб вибрати існуючого клієнта
+                    </small>
+                <hr/>
                 </div>
 <div id="clientInfo" class="alert alert-light border d-none">
     <div><strong>Телефон:</strong> <span id="clientPhone">—</span></div>
@@ -242,6 +254,16 @@ brandSelect.addEventListener('change', function () {
         let opt = document.createElement("option");
         opt.value = m;
         dl.appendChild(opt);
+    });
+});
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+    $('#counterparty_id').select2({
+        placeholder: 'Почніть вводити імʼя або номер телефону',
+        width: '100%',
+        allowClear: true
     });
 });
 </script>
