@@ -32,7 +32,7 @@ class Order extends Model
 
     public function client()
 {
-    return $this->belongsTo(Counterparty::class, 'client_id');
+    return $this->belongsTo(Counterparty::class, 'counterparty_id');
 }
 
 public function device()
