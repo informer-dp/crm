@@ -89,7 +89,7 @@ public function index(Request $request)
         $query->where('counterparty_id', $request->counterparty_id);
     }
 
-    $orders = $query->latest()->paginate(15)->withQueryString();
+    $orders = $query->latest()->paginate(115)->withQueryString();
 
     return view('orders.index', compact(
         'orders',
