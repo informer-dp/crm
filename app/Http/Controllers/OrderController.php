@@ -129,12 +129,14 @@ public function index(Request $request)
         'brand_id'          => ['required', 'exists:brands,id'],
         'device_model'      => ['required', 'string', 'max:191'],
         'serial_number'     => ['nullable', 'string', 'max:191'],
+         'equipment'        => ['nullable', 'string', 'max:191'],
         'problem_description' => ['required', 'string'],
     ], [
         'counterparty_id.required' => 'Оберіть клієнта',
         'device_id.required' => 'Оберіть тип пристрою',
         'brand_id.required' => 'Вкажіть бренд',
         'device_model.required' => 'Вкажіть модель',
+        'equipment.required' => 'Вкажіть комплектацію',
         'problem_description.required' => 'Опишіть проблему',
     ]);
 
@@ -179,6 +181,8 @@ public function update(Request $request, Order $order)
         'counterparty_id' => 'required|exists:counterparties,id',
         'device_id' => 'required|exists:devices,id', // Перевірка, що поле обов’язкове і значення існує в таблиці devices
         'device_model' => 'required|string|max:255',
+        'serial_number' => 'nullable|string|max:191',
+        'equipment' => 'nullable|string',
         'problem_description' => 'required|string|max:1000',
         //'status' => 'required|exists:order_statuses,id',
         'price' => 'nullable|numeric|min:0',

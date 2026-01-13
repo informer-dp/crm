@@ -150,12 +150,10 @@
     </div>
 
     <div class="card-footer">
+        <!-- Пагінація -->
         {{ $orders->links() }}
     </div>
 </div>
 
-
-    <!-- Пагінація -->
-    {{ $orders->links() }}
 </div>
 @endsection

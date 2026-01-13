@@ -8,17 +8,19 @@
         @csrf
         @method('PUT')
 
-        <div class="form-group">
-           
-        <select name="counterparty_id" class="form-control">
-        @foreach($counterparties as $c)
-        <!-- <option value="{{ $c->id }}">{{ $c->name }}</option> -->
-                    <option value="{{ $c->id }}"
-                        {{ request('counterparty_id') == $c->id ? 'selected' : '' }}>
-                        {{ $c->contact->name ?? 'Без імені' }}
+        <div class="mb-3">
+            <label class="form-label">Контрагент</label>
+            <select name="counterparty_id" class="form-select" required>
+                <option value="">— Оберіть контрагента —</option>
+
+                @foreach($counterparties as $counterparty)
+                    <option value="{{ $counterparty->id }}"
+                        @selected($order->counterparty_id === $counterparty->id)>
+                        {{ $counterparty->contact->name }}
                     </option>
-        @endforeach
-        </select>
+                @endforeach
+            </select>
+        </div>
 
         <div class="mb-3">
             <label for="device_id" class="form-label">Тип пристрою</label>
@@ -39,6 +41,22 @@
             <label for="device_model">Модель пристрою</label>
             <input type="text" name="device_model" id="device_model" class="form-control" value="{{ $order->device_model }}">
         </div>
+
+        <div class="mb-3">
+            <label class="form-label">Серійний номер / IMEI</label>
+            <input type="text"
+                name="serial_number"
+                class="form-control"
+                value="{{ old('serial_number', $order->serial_number) }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Комплектація</label>
+            <textarea name="equipment"
+                    class="form-control"
+                    rows="2"
+                    placeholder="Зарядний пристрій, сумка, кабель тощо">{{ old('equipment', $order->equipment) }}</textarea>
+        </div>
+
 
         <div class="form-group">
             <label for="problem_description">Опис проблеми</label>

@@ -87,89 +87,7 @@
         </table>
     </div>
 </div>
- @if(isset($item->id))
-{{--====Модал Редагування====---}}
-<div class="modal fade"
-     id="editEstimationModal{{ $item->id }}"
-     tabindex="-1"
-     aria-hidden="true">
 
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <form class="modal-content"
-              method="POST"
-              action="{{ route('orders.estimations.update', $item->id) }}">
-
-            @csrf
-            @method('PATCH')
-
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    Редагування позиції кошторису
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-            </div>
-
-            <div class="modal-body">
-                {{-- Опис --}}
-                <div class="mb-3">
-                    <label class="form-label">Опис роботи / деталі</label>
-                    <textarea name="description"
-                              class="form-control"
-                              rows="3"
-                              required>{{ $item->description }}</textarea>
-                </div>
-
-                <div class="row">
-                    {{-- Запчастини --}}
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Запчастини (грн)</label>
-                        <input type="number"
-                               step="0.01"
-                               min="0"
-                               name="part_cost"
-                               class="form-control"
-                               value="{{ $item->part_cost }}">
-                    </div>
-
-                    {{-- Робота --}}
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Робота (грн)</label>
-                        <input type="number"
-                               step="0.01"
-                               min="0"
-                               name="labor_cost"
-                               class="form-control"
-                               value="{{ $item->labor_cost }}">
-                    </div>
-                </div>
-
-                <div class="alert alert-info small mb-0">
-                    Загальна сума буде перерахована автоматично
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        data-bs-dismiss="modal">
-                    Скасувати
-                </button>
-
-                <button type="submit" class="btn btn-primary">
-                    Зберегти
-                </button>
-            </div>
-
-        </form>
-    </div>
-</div>
-@endif
 {{-- ================= Modal Додати ================= --}}
 <div class="modal fade" id="addEstimationModal">
     <div class="modal-dialog">
@@ -191,8 +109,6 @@
     <input name="description" class="form-control" required>
 </div>
 
-
-
 <div class="mb-3">
     <label>Запчастина</label>
     <input type="number" name="part_cost" class="form-control" min="0">
@@ -213,3 +129,74 @@
         </form>
     </div>
 </div>
+ {{-- ================= Модали редагування ================= --}}
+@foreach($order->estimations as $item)
+<div class="modal fade"
+     id="editEstimationModal{{ $item->id }}"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content"
+              method="POST"
+              action="{{ route('orders.estimations.update', $item->id) }}">
+
+            @csrf
+            @method('PATCH')
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Редагування позиції кошторису
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Опис</label>
+                    <textarea name="description"
+                              class="form-control"
+                              rows="2"
+                              required>{{ $item->description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Запчастини</label>
+                    <input type="number"
+                           step="0.01"
+                           min="0"
+                           name="part_cost"
+                           class="form-control"
+                           value="{{ $item->part_cost }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Робота</label>
+                    <input type="number"
+                           step="0.01"
+                           min="0"
+                           name="labor_cost"
+                           class="form-control"
+                           value="{{ $item->labor_cost }}">
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Скасувати
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Зберегти
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+@endforeach

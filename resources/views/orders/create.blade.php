@@ -135,7 +135,14 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-
+                {{-- ================= Комплектація ================= --}}
+                <div class="mb-3">
+                    <label class="form-label">Комплектація</label>
+                    <textarea name="equipment"
+                            class="form-control"
+                            rows="2"
+                            placeholder="Зарядний пристрій, сумка, кабель тощо">{{ old('equipment') }}</textarea>
+                </div>
 
                 {{-- ================= Опис несправності ================= --}}
                 <div class="mb-4">

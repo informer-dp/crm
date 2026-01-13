@@ -17,6 +17,7 @@ class Order extends Model
         'brand_id', 
         'device_model', 
         'serial_number', 
+        'equipment',
         'problem_description', 
         'status_id'
     ];

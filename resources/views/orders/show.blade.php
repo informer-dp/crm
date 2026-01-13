@@ -86,7 +86,8 @@
                     </p>
 
                     <hr>
-
+                    <div class="row">
+<div class="col">
                     <h5>Статус</h5>
                     <!-- <span class="badge bg-primary">
                         {{ $order->status }}
@@ -106,7 +107,14 @@
 
                             <button class="btn btn-primary mt-2">Оновити статус</button>
                         </form>
-
+</div>
+<div class="col">
+<h5>Комплектація</h5>
+ <div class="border rounded p-2">
+ {!! nl2br(e($order->equipment)) !!}
+</div>
+</div>
+</div>
                     <hr>
 
                     <h5>Проблема</h5>
@@ -158,7 +166,7 @@
         {{-- ================= Платежі ================= --}}
         <div class="tab-pane fade" id="tab-payments">
             <div class="alert alert-info">
-                Тут буде рух коштів по замовленню.
+                Тут буде відображення коштів по замовленню.
             </div>
         </div>
 
