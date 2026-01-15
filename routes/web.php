@@ -60,8 +60,10 @@ Route::middleware('auth')->get('/ajax/counterparty/{id}', function ($id) {
                 'email' => $counterparty->contact->email,
             ]);
     })->name('ajax.counterparty');
-    
+
 Route::get('/contacts/check-phone', [ContactController::class, 'checkPhone']) ->middleware('auth');
+Route::get('/ajax/counterparties', [CounterpartyController::class, 'search'])->middleware('auth');
+
 
 Route::middleware('auth')->post('/ajax/create-counterparty', function (\Illuminate\Http\Request $request) {
 

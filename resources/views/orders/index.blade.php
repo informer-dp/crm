@@ -4,52 +4,86 @@
 <div class="container">
     <h3>Замовлення</h3>
 <hr />
-    <!-- Фільтри 
-   
-<form method="GET" action="{{ route('orders.index') }}" class="mb-3">
+<!-- Presets -->
+ <div class="btn-group mb-3">
+    <!-- <a href="{{ route('orders.index', ['preset' => 'my']) }}" class="btn btn-outline-secondary">Мої</a> -->
+    <a href="{{ route('orders.index', ['preset' => 'today']) }}" class="btn btn-outline-secondary">Сьогодні</a>
+    <!-- <a href="{{ route('orders.index', ['preset' => 'overdue']) }}" class="btn btn-outline-danger">Прострочені</a> -->
+</div>
 
-    <div class="row">
+<!-- Filters-->
+    <form method="GET" action="{{ route('orders.index') }}" class="card mb-3">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
 
-        {{-- Група контрагентів --}}
-        <div class="col-md-4">
-            <label>Група контрагентів</label>
-            <select name="group_id" class="form-control">
-                <option value="">— Усі групи —</option>
-                @foreach($groups as $group)
-                    <option value="{{ $group->id }}"
-                        {{ request('group_id') == $group->id ? 'selected' : '' }}>
-                        {{ $group->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            {{-- Тип пристрою --}}
+            <div class="col-md-2">
+                <label class="form-label">Тип пристрою</label>
+                <select name="device" class="form-select">
+                    <option value="">Усі</option>
+                    @foreach($devices as $device)
+                        <option value="{{ $device->id }}"
+                            @selected(request('device') == $device->id)>
+                            {{ $device->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        {{-- Контрагент --}}
-        <div class="col-md-4">
-            <label>Контрагент</label>
-            <select name="counterparty_id" class="form-control">
-                <option value="">— Усі контрагенти —</option>
-                @foreach($counterparties as $c)
-                    <option value="{{ $c->id }}"
-                        {{ request('counterparty_id') == $c->id ? 'selected' : '' }}>
-                        {{ $c->contact->name ?? 'Без імені' }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            {{-- Бренд --}}
+            <div class="col-md-2">
+                <label class="form-label">Бренд</label>
+                <select name="brand" class="form-select">
+                    <option value="">Усі</option>
+                    @foreach($brands as $brand)
+                        <option value="{{ $brand->id }}"
+                            @selected(request('brand') == $brand->id)>
+                            {{ $brand->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        {{-- Кнопки --}}
-        <div class="col-md-4 d-flex align-items-end">
-            <button class="btn btn-primary me-2">Фільтрувати</button>
+            {{-- Статус --}}
+            <div class="col-md-2">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Усі</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status->id }}"
+                            @selected(request('status') == $status->id)>
+                            {{ $status->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-            <a href="{{ route('orders.index') }}" class="btn btn-secondary">
-                Скинути
-            </a>
+            {{-- Пошук --}}
+            <div class="col-md-3">
+                <input type="text"
+                    name="phone"
+                    value="{{ request('phone') }}"
+                    class="form-control"
+                    placeholder="Телефон клієнта">
+            </div>
+
+
+            {{-- Кнопки --}}
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-primary w-100">
+                    Фільтрувати
+                </button>
+
+                <a href="{{ route('orders.index') }}"
+                   class="btn btn-outline-secondary">
+                    Скинути
+                </a>
+            </div>
+
         </div>
     </div>
-
 </form>
--->
+
 
     <!-- Таблиця із замовленнями -->
     <div class="card">
@@ -157,3 +191,22 @@
 
 </div>
 @endsection
+<!-- <script>
+    $('#counterparty_id').select2({
+    placeholder: 'Клієнт',
+    allowClear: true,
+    ajax: {
+        url: '/ajax/counterparties',
+        dataType: 'json',
+        delay: 300,
+        data: params => ({ q: params.term }),
+        processResults: data => ({ results: data })
+    }
+});
+</script>
+<script>
+    $('#brand_id').select2({
+    placeholder: 'Бренд',
+    allowClear: true
+});
+</script> -->

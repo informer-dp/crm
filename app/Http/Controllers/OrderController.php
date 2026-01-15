@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\OrderStatus;
 use App\Models\Order;
 use App\Models\Counterparty;
-//use App\Models\Client;
 use App\Models\CounterpartyGroup;
 use Illuminate\Http\Request;
 //use App\Models\OrderEstimation;
@@ -19,85 +18,64 @@ use App\Models\Estimate;
 
 class OrderController extends Controller
 {
-    // app/Http/Controllers/OrderController.php
-/*
+
 public function index(Request $request)
 {
-    // Отримуємо параметри для фільтрації
-    $status = $request->input('status'); // Фільтр за статусом
-    $date = $request->input('date');     // Фільтр за датою
-
-    // Базовий запит для отримання всіх замовлень
-    $query = Order::with('client');
-
-    // Додаємо фільтрацію за статусом, якщо обрано
-    if ($status) {
-        $query->where('status', $status);
-    }
-
-    // Додаємо фільтрацію за датою, якщо вказано
-    // Фільтрація за періодом
-    if ($request->filled('start_date') && $request->filled('end_date')) {
-        $startDate = Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
-        $endDate = Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
-
-        $query->whereBetween('created_at', [$startDate, $endDate]);
-    }
-$query = Order::query()->with('counterparty');
-
-if(request('group_id')){
-    $query->whereHas('counterparty', function($q){
-        $q->where('group_id', request('group_id'));
-    });
-}
-
-if(request('counterparty_id')){
-    $query->where('counterparty_id', request('counterparty_id'));
-}
-
-
-    // Виконуємо запит
-    $orders = $query->latest()->paginate(20);
-
-    return view('orders.index', compact('orders'));
-    
-    
-}
-*/
-public function index(Request $request)
-{
-    $groups = \App\Models\CounterpartyGroup::orderBy('name')->get();
-
-    $counterparties = \App\Models\Counterparty::query()
-        ->join('contacts', 'counterparties.contact_id', '=', 'contacts.id')
-        ->select('counterparties.*')
-        ->orderBy('contacts.name')
-        ->get();
-
     $query = Order::query()
-        ->with(['counterparty.contact', 'device','brand','status']);
+        ->with([
+            'device',
+            'brand',
+            'status',
+            'counterparty.contact'
+        ]);
 
-    // 🔎 Фільтр по групі
-    if ($request->filled('group_id')) {
-        $query->whereHas('counterparty', function ($q) use ($request) {
-            $q->where('group_id', $request->group_id);
+    // 🔽 Фільтр: тип пристрою
+    if ($request->filled('device')) {
+        $query->where('device_id', $request->device);
+    }
+
+    // 🔽 Фільтр: бренд
+    if ($request->filled('brand')) {
+        $query->where('brand_id', $request->brand);
+    }
+
+    // 🔽 Фільтр: статус
+    if ($request->filled('status')) {
+        $query->where('status_id', $request->status);
+    }
+
+    // 🔍 Пошук: телефон клієнта
+    if ($request->filled('phone')) {
+        $query->whereHas('counterparty.contact', function ($q) use ($request) {
+            $q->where('phone', 'like', '%' . $request->phone . '%');
         });
     }
-
-    // 🔎 Фільтр по контрагенту
-    if ($request->filled('counterparty_id')) {
-        $query->where('counterparty_id', $request->counterparty_id);
+    //  Presets for status filter
+    if ($request->preset === 'my') {
+    $query->where('responsible_id', auth()->id());
     }
 
-    $orders = $query->latest()->paginate(115)->withQueryString();
+    if ($request->preset === 'today') {
+        $query->whereDate('created_at', now());
+    }
 
-    return view('orders.index', compact(
-        'orders',
-        'groups',
-        'counterparties'
-    ));
+    if ($request->preset === 'overdue') {
+        $query->whereDate('deadline', '<', now())
+            ->whereHas('status', fn($q) => $q->where('is_final', false));
+    }
+
+        $orders = $query
+            ->orderByDesc('orders.created_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('orders.index', [
+            'orders'   => $orders,
+            'devices'  => Device::orderBy('name')->get(),
+            'brands'   => Brand::orderBy('name')->get(),
+            'statuses' => OrderStatus::orderBy('sort_order')->get(),
+        ]);
 }
-
 
 
     public function create()
@@ -275,7 +253,6 @@ public function destroyEstimation(Estimate $estimation)
 
     return back()->with('success', 'Позицію кошторису видалено');
 }
-
 
 
 }

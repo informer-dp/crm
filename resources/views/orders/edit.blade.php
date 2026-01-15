@@ -16,7 +16,7 @@
                 @foreach($counterparties as $counterparty)
                     <option value="{{ $counterparty->id }}"
                         @selected($order->counterparty_id === $counterparty->id)>
-                        {{ $counterparty->contact->name }}
+                       {{ $counterparty->contact->phone }}&nbsp;&nbsp; {{ $counterparty->contact->name }}
                     </option>
                 @endforeach
             </select>
