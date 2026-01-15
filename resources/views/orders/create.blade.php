@@ -275,3 +275,22 @@ $(document).ready(function () {
 });
 
 </script>
+<script>
+    $('#counterparty_id').select2({
+    placeholder: 'Клієнт',
+    allowClear: true,
+    ajax: {
+        url: '/ajax/counterparties',
+        dataType: 'json',
+        delay: 300,
+        data: params => ({ q: params.term }),
+        processResults: data => ({ results: data })
+    }
+});
+</script>
+<script>
+    $('#brand_id').select2({
+    placeholder: 'Бренд',
+    allowClear: true
+});
+</script>

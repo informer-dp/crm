@@ -63,10 +63,12 @@ public function index(Request $request)
         $query->whereDate('deadline', '<', now())
             ->whereHas('status', fn($q) => $q->where('is_final', false));
     }
-
+        $excludedStatuses = ['finished', 'archived'];
         $orders = $query
+            // ->whereHas('status', function ($q) use ($excludedStatuses) {
+            // $q->whereNotIn('code', $excludedStatuses); })
             ->orderByDesc('orders.created_at')
-            ->paginate(20)
+            ->paginate(100)
             ->withQueryString();
 
         return view('orders.index', [
