@@ -21,38 +21,69 @@ class OrderController extends Controller
 
 public function index(Request $request)
 {
+    /*
+    |--------------------------------------------------------------------------
+    | 1. SESSION-ФІЛЬТРИ (Видані / Архівні)
+    |--------------------------------------------------------------------------
+    */
+    if ($request->hasAny(['show_issued', 'show_archived'])) {
+        session([
+            'orders.show_issued'   => $request->boolean('show_issued'),
+            'orders.show_archived' => $request->boolean('show_archived'),
+        ]);
+    }
+
+    $showIssued   = session('orders.show_issued', false);
+    $showArchived = session('orders.show_archived', false);
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2. БАЗОВИЙ ЗАПИТ
+    |--------------------------------------------------------------------------
+    */
     $query = Order::query()
         ->with([
             'device',
             'brand',
             'status',
-            'counterparty.contact'
+            'counterparty.contact',
         ]);
 
-    // 🔽 Фільтр: тип пристрою
+    /*
+    |--------------------------------------------------------------------------
+    | 3. ФІЛЬТРИ
+    |--------------------------------------------------------------------------
+    */
+
+    // Тип пристрою
     if ($request->filled('device')) {
         $query->where('device_id', $request->device);
     }
 
-    // 🔽 Фільтр: бренд
+    // Бренд
     if ($request->filled('brand')) {
         $query->where('brand_id', $request->brand);
     }
 
-    // 🔽 Фільтр: статус
+    // Статус
     if ($request->filled('status')) {
         $query->where('status_id', $request->status);
     }
 
-    // 🔍 Пошук: телефон клієнта
+    // Пошук по телефону
     if ($request->filled('phone')) {
         $query->whereHas('counterparty.contact', function ($q) use ($request) {
             $q->where('phone', 'like', '%' . $request->phone . '%');
         });
     }
-    //  Presets for status filter
+
+    /*
+    |--------------------------------------------------------------------------
+    | 4. PRESETS
+    |--------------------------------------------------------------------------
+    */
     if ($request->preset === 'my') {
-    $query->where('responsible_id', auth()->id());
+        $query->where('responsible_id', auth()->id());
     }
 
     if ($request->preset === 'today') {
@@ -61,23 +92,51 @@ public function index(Request $request)
 
     if ($request->preset === 'overdue') {
         $query->whereDate('deadline', '<', now())
-            ->whereHas('status', fn($q) => $q->where('is_final', false));
+              ->whereHas('status', fn ($q) => $q->where('is_final', false));
     }
-        $excludedStatuses = ['finished', 'archived'];
-        $orders = $query
-            // ->whereHas('status', function ($q) use ($excludedStatuses) {
-            // $q->whereNotIn('code', $excludedStatuses); })
-            ->orderByDesc('orders.created_at')
-            ->paginate(100)
-            ->withQueryString();
 
-        return view('orders.index', [
-            'orders'   => $orders,
-            'devices'  => Device::orderBy('name')->get(),
-            'brands'   => Brand::orderBy('name')->get(),
-            'statuses' => OrderStatus::orderBy('sort_order')->get(),
-        ]);
+    /*
+    |--------------------------------------------------------------------------
+    | 5. СТАТУСИ "ВИДАНІ / АРХІВНІ"
+    |--------------------------------------------------------------------------
+    */
+    if (!$showIssued) {
+        $query->whereHas('status', fn ($q) => $q->where('code', '!=', 'finished'));
+    }
+
+    if (!$showArchived) {
+        $query->whereHas('status', fn ($q) => $q->where('code', '!=', 'archived'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 6. РЕЗУЛЬТАТ
+    |--------------------------------------------------------------------------
+    */
+    $orders = $query
+        ->orderByDesc('created_at')
+        ->paginate(100)
+        ->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | 7. ДОВІДНИКИ ДЛЯ ФІЛЬТРІВ
+    |--------------------------------------------------------------------------
+    */
+    $devices  = Device::orderBy('name')->get();
+    $brands   = Brand::orderBy('name')->get();
+    $statuses = OrderStatus::orderBy('sort_order')->get();
+
+    return view('orders.index', compact(
+        'orders',
+        'devices',
+        'brands',
+        'statuses',
+        'showIssued',
+        'showArchived'
+    ));
 }
+
 
 
     public function create()

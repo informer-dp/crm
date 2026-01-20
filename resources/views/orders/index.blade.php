@@ -2,7 +2,31 @@
 
 @section('content')
 <div class="container">
-    <h3>Замовлення</h3>
+    <div class="d-flex justify-content-between align-items-center">
+    <h3>Замовлення</h3> 
+     <form method="GET" action="{{ route('orders.index') }}" class="mb-3">
+        <div class="form-check form-check-inline">
+            <input class="form-check-input"
+                type="checkbox"
+                name="show_issued"
+                value="1"
+                onchange="this.form.submit()"
+                {{ session('orders.show_issued') ? 'checked' : '' }}>
+            <label class="form-check-label">Видані</label>
+        </div>
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input"
+                type="checkbox"
+                name="show_archived"
+                value="1"
+                onchange="this.form.submit()"
+                {{ session('orders.show_archived') ? 'checked' : '' }}>
+            <label class="form-check-label">Архівні</label>
+        </div>
+    </form>
+
+</div>
 <hr />
 <!-- Presets -->
  <div class="btn-group mb-3">
