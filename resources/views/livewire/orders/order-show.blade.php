@@ -1,0 +1,645 @@
+<div>
+    {{-- Шапка --}}
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('orders.index') }}" class="btn btn-ghost btn-sm gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Назад
+        </a>
+        <div class="flex-1">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold font-mono">{{ $order->number }}</h1>
+                @if($order->isUrgent())
+                    <span class="badge badge-error">Терміново</span>
+                @endif
+                @php
+                    $statusColors = [
+                        'new'           => 'badge-info',
+                        'diagnosed'     => 'badge-warning',
+                        'approved'      => 'badge-warning',
+                        'in_progress'   => 'badge-primary',
+                        'waiting_parts' => 'badge-ghost',
+                        'ready'         => 'badge-success',
+                        'issued'        => 'badge-neutral',
+                        'cancelled'     => 'badge-error',
+                    ];
+                @endphp
+                <span class="badge {{ $statusColors[$order->status] ?? 'badge-ghost' }} badge-lg">
+                    {{ $order->status_label }}
+                </span>
+            </div>
+            <p class="text-base-content/60 text-sm mt-1">
+                {{ $order->type_label }} · Створено {{ $order->created_at->format('d.m.Y H:i') }}
+            </p>
+        </div>
+        <div class="flex gap-2">
+    {{-- Друк квитанції прийому --}}
+    <a href="{{ route('orders.print', [$order, 'acceptance']) }}"
+       target="_blank"
+       class="btn btn-ghost btn-sm gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Квитанція
+    </a>
+    @if($order->estimate)
+    <a href="{{ route('orders.print', [$order, 'final']) }}"
+       target="_blank"
+       class="btn btn-ghost btn-sm gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Рахунок
+    </a>
+    @endif
+    @if($order->status === 'issued' || $order->status === 'ready')
+<a href="{{ route('orders.print.warranty', $order) }}"
+   target="_blank"
+   class="btn btn-ghost btn-sm gap-1">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+    </svg>
+    Гарантія
+</a>
+@endif
+</div>
+        <div class="flex gap-2">
+            @if(!$order->isLocked())
+                <a href="{{ route('orders.edit', $order) }}" class="btn btn-outline btn-sm">
+                    Редагувати
+                </a>
+            @endif
+        </div>
+    </div>
+
+    {{-- Кнопки зміни статусу --}}
+    @if(!$order->isLocked())
+    <div class="flex flex-wrap gap-2 mb-6">
+        @foreach(\App\Models\Order::ACTIVE_STATUSES as $status)
+            @if($order->canTransitionTo($status))
+                @php
+                    $btnColors = [
+                        'diagnosed'     => 'btn-info',
+                        'approved'      => 'btn-warning',
+                        'in_progress'   => 'btn-primary',
+                        'waiting_parts' => 'btn-ghost',
+                        'ready'         => 'btn-success',
+                        'issued'        => 'btn-neutral',
+                    ];
+                    $labels = [
+                        'new'           => 'Нова',
+                        'diagnosed'     => '→ Діагностика',
+                        'approved'      => '→ Узгоджено',
+                        'in_progress'   => '→ В роботу',
+                        'waiting_parts' => '→ Очікує деталей',
+                        'ready'         => '→ Готове',
+                        'issued'        => '→ Видати',
+                    ];
+                @endphp
+                <button wire:click="openStatusModal('{{ $status }}')"
+                        class="btn btn-sm {{ $btnColors[$status] ?? 'btn-ghost' }}">
+                    {{ $labels[$status] ?? $status }}
+                </button>
+            @endif
+        @endforeach
+        @if($order->canTransitionTo('cancelled'))
+            <button wire:click="openStatusModal('cancelled')"
+                    class="btn btn-sm btn-error btn-outline">
+                Скасувати
+            </button>
+        @endif
+    </div>
+    {{-- Inline форма зміни статусу --}}
+        @if($showStatusModal)
+        <div class="card bg-base-100 shadow-sm mb-4 border-2 border-primary">
+            <div class="card-body py-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex-1">
+                        <textarea wire:model="statusComment"
+                                class="textarea textarea-bordered textarea-sm w-full"
+                                rows="1"
+                                placeholder="Коментар до зміни статусу (необов'язково)..."></textarea>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button wire:click="changeStatus" class="btn btn-primary btn-sm">
+                            Підтвердити
+                        </button>
+                        <button wire:click="$set('showStatusModal', false)" class="btn btn-ghost btn-sm">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        {{-- Ліва колонка --}}
+        <div class="lg:col-span-2 flex flex-col gap-4">
+
+            {{-- Пристрій --}}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">Пристрій</h2>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-base-content/60">Тип</p>
+                            <p class="font-medium">{{ $order->device->deviceType->name ?? '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-base-content/60">Модель</p>
+                            <p class="font-medium">{{ $order->device->full_name }}</p>
+                        </div>
+                        @if($order->device->serial_number)
+                        <div>
+                            <p class="text-base-content/60">Серійний номер</p>
+                            <p class="font-medium font-mono">{{ $order->device->serial_number }}</p>
+                        </div>
+                        @endif
+                        @if($order->device->imei)
+                        <div>
+                            <p class="text-base-content/60">IMEI</p>
+                            <p class="font-medium font-mono">{{ $order->device->imei }}</p>
+                        </div>
+                        @endif
+                        @if($order->device->appearance)
+                        <div class="col-span-2">
+                            <p class="text-base-content/60">Зовнішній вигляд</p>
+                            <p>{{ $order->device->appearance }}</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Несправність і діагноз --}}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">Несправність</h2>
+                    <div class="flex flex-col gap-3 text-sm">
+                        <div>
+                            <p class="text-base-content/60 mb-1">Скарга клієнта</p>
+                            <p class="bg-base-200 rounded-lg p-3">{{ $order->malfunction }}</p>
+                        </div>
+                        @if($order->diagnosis)
+                        <div>
+                            <p class="text-base-content/60 mb-1">Висновок інженера</p>
+                            <p class="bg-base-200 rounded-lg p-3">{{ $order->diagnosis }}</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Кошторис --}}
+<div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="card-title text-base">Кошторис</h2>
+            @if(!$order->isLocked())
+                <button wire:click="initEstimate" class="btn btn-ghost btn-xs gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    {{ $order->estimate ? 'Редагувати' : 'Створити кошторис' }}
+                </button>
+            @endif
+        </div>
+
+        @if($order->estimate)
+
+            {{-- Роботи --}}
+            @if($order->estimate->works->count())
+            <div class="mb-3">
+                <p class="text-xs font-medium text-base-content/60 mb-2 uppercase tracking-wide">Роботи</p>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Назва</th>
+                            <th class="text-right w-24">Ціна</th>
+                            <th class="text-right w-16">К-сть</th>
+                            <th class="text-right w-24">Сума</th>
+                            @if(!$order->isLocked())<th class="w-8"></th>@endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($order->estimate->works as $work)
+                        <tr>
+                            <td>
+                                <span>{{ $work->name }}</span>
+                                @if($work->is_warranty)
+                                    <span class="badge badge-ghost badge-xs ml-1">гарантія</span>
+                                @endif
+                                @if($work->work_type === 'subcontract')
+                                    <span class="badge badge-warning badge-xs ml-1">підряд</span>
+                                @endif
+                            </td>
+                            <td class="text-right">{{ number_format($work->price, 0, '.', ' ') }} ₴</td>
+                            <td class="text-right">{{ $work->quantity }}</td>
+                            <td class="text-right font-medium">{{ number_format($work->total, 0, '.', ' ') }} ₴</td>
+                            @if(!$order->isLocked())
+                            <td>
+                                <button wire:click="removeWork({{ $work->id }})"
+                                        wire:confirm="Видалити цей рядок?"
+                                        class="btn btn-ghost btn-xs text-error">✕</button>
+                            </td>
+                            @endif
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            {{-- Запчастини --}}
+            @if($order->estimate->parts->count())
+            <div class="mb-3">
+                <p class="text-xs font-medium text-base-content/60 mb-2 uppercase tracking-wide">Запчастини</p>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Назва</th>
+                            <th class="text-right w-24">Ціна</th>
+                            <th class="text-right w-16">К-сть</th>
+                            <th class="text-right w-24">Сума</th>
+                            @if(!$order->isLocked())<th class="w-8"></th>@endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($order->estimate->parts as $part)
+                        <tr>
+                            <td>
+                                <span>{{ $part->name }}</span>
+                                @if($part->is_own_part)
+                                    <span class="badge badge-ghost badge-xs ml-1">клієнта</span>
+                                @endif
+                            </td>
+                            <td class="text-right">{{ number_format($part->price, 0, '.', ' ') }} ₴</td>
+                            <td class="text-right">{{ $part->quantity }}</td>
+                            <td class="text-right font-medium">{{ number_format($part->total, 0, '.', ' ') }} ₴</td>
+                            @if(!$order->isLocked())
+                            <td>
+                                <button wire:click="removePart({{ $part->id }})"
+                                        wire:confirm="Видалити цей рядок?"
+                                        class="btn btn-ghost btn-xs text-error">✕</button>
+                            </td>
+                            @endif
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            {{-- Підсумок --}}
+            <div class="divider my-1"></div>
+            <div class="flex flex-col gap-1 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-base-content/60">Роботи:</span>
+                    <span>{{ number_format($order->estimate->works_total, 0, '.', ' ') }} ₴</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-base-content/60">Запчастини:</span>
+                    <span>{{ number_format($order->estimate->parts_total, 0, '.', ' ') }} ₴</span>
+                </div>
+                @if(!$order->isLocked())
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-base-content/60 text-sm">Знижка:</span>
+                    <input type="number" min="0"
+                           value="{{ $order->estimate->discount }}"
+                           wire:change="updateDiscount($event.target.value, '{{ $order->estimate->discount_type }}')"
+                           class="input input-bordered input-xs w-24"/>
+                    <select wire:change="updateDiscount('{{ $order->estimate->discount }}', $event.target.value)"
+                            class="select select-bordered select-xs w-20">
+                        <option value="fixed" {{ $order->estimate->discount_type === 'fixed' ? 'selected' : '' }}>₴</option>
+                        <option value="percent" {{ $order->estimate->discount_type === 'percent' ? 'selected' : '' }}>%</option>
+                    </select>
+                </div>
+                @elseif($order->estimate->discount > 0)
+                <div class="flex justify-between text-error">
+                    <span>Знижка:</span>
+                    <span>-{{ number_format($order->estimate->discount, 0, '.', ' ') }}
+                        {{ $order->estimate->discount_type === 'percent' ? '%' : '₴' }}
+                    </span>
+                </div>
+                @endif
+                <div class="flex justify-between font-bold text-base mt-1">
+                    <span>Разом:</span>
+                    <span>{{ number_format($order->estimate->total, 0, '.', ' ') }} ₴</span>
+                </div>
+            </div>
+
+            {{-- Форма додавання рядків --}}
+            @if($showEstimateForm && !$order->isLocked())
+            <div class="divider my-2"></div>
+
+            {{-- Додати роботу --}}
+            <div class="bg-base-200 rounded-xl p-3 mb-3">
+                <p class="text-xs font-medium mb-2 uppercase tracking-wide">Додати роботу</p>
+                <div class="grid grid-cols-1 gap-2">
+                    <input wire:model="workName" type="text"
+                           class="input input-bordered input-sm w-full"
+                           placeholder="Назва роботи *"/>
+                    @error('workName')<span class="text-error text-xs">{{ $message }}</span>@enderror
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <input wire:model="workPrice" type="number" min="0"
+                                   class="input input-bordered input-sm w-full"
+                                   placeholder="Ціна *"/>
+                            @error('workPrice')<span class="text-error text-xs">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <input wire:model="workQuantity" type="number" min="1"
+                                   class="input input-bordered input-sm w-full"
+                                   placeholder="К-сть"/>
+                        </div>
+                        <div>
+                            <select wire:model="workEngineerId" class="select select-bordered select-sm w-full">
+                                <option value="">Інженер</option>
+                                @foreach($engineers as $eng)
+                                    <option value="{{ $eng->id }}">{{ $eng->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input wire:model="workIsWarranty" type="checkbox" class="checkbox checkbox-sm"/>
+                            <span class="text-xs">Гарантійна робота</span>
+                        </label>
+                        <button wire:click="addWork" class="btn btn-primary btn-sm">
+                            Додати роботу
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Додати запчастину --}}
+            <div class="bg-base-200 rounded-xl p-3">
+                <p class="text-xs font-medium mb-2 uppercase tracking-wide">Додати запчастину</p>
+                <div class="grid grid-cols-1 gap-2">
+                    <input wire:model="partName" type="text"
+                           class="input input-bordered input-sm w-full"
+                           placeholder="Назва запчастини *"/>
+                    @error('partName')<span class="text-error text-xs">{{ $message }}</span>@enderror
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <input wire:model="partPrice" type="number" min="0"
+                                   class="input input-bordered input-sm w-full"
+                                   placeholder="Ціна клієнта *"/>
+                            @error('partPrice')<span class="text-error text-xs">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <input wire:model="partCost" type="number" min="0"
+                                   class="input input-bordered input-sm w-full"
+                                   placeholder="Собівартість"/>
+                        </div>
+                        <div>
+                            <input wire:model="partQuantity" type="number" min="1"
+                                   class="input input-bordered input-sm w-full"
+                                   placeholder="К-сть"/>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input wire:model="partIsOwn" type="checkbox" class="checkbox checkbox-sm"/>
+                            <span class="text-xs">Запчастина клієнта</span>
+                        </label>
+                        <button wire:click="addPart" class="btn btn-primary btn-sm">
+                            Додати запчастину
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+        @else
+            <p class="text-base-content/40 text-sm">Кошторис ще не створено</p>
+        @endif
+    </div>
+</div>
+
+            {{-- Коментарі --}}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">Коментарі</h2>
+                    @forelse($order->comments as $comment)
+                    <div class="flex gap-3 text-sm {{ $comment->is_internal ? 'opacity-70' : '' }}">
+                        <div class="avatar placeholder flex-shrink-0">
+                            <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                <span class="text-xs">{{ substr($comment->user?->name ?? '?', 0, 1) }}</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium">{{ $comment->user?->name ?? 'Система' }}</span>
+                                @if($comment->is_internal)
+                                    <span class="badge badge-ghost badge-xs">внутрішній</span>
+                                @endif
+                                <span class="text-base-content/40 text-xs">{{ $comment->created_at->format('d.m.Y H:i') }}</span>
+                            </div>
+                            <p class="mt-1">{{ $comment->body }}</p>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-base-content/40 text-sm">Коментарів немає</p>
+                    @endforelse
+                    {{-- Форма додавання коментаря --}}
+            <div class="mt-4 pt-4 border-t border-base-200">
+                <div class="form-control mb-2">
+                    <textarea wire:model="newComment"
+                            class="textarea textarea-bordered textarea-sm"
+                            rows="2"
+                            placeholder="Додати коментар..."></textarea>
+                    @error('newComment')<span class="text-error text-xs">{{ $message }}</span>@enderror
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input wire:model="commentIsInternal" type="checkbox" class="checkbox checkbox-sm"/>
+                        <span class="text-xs">Тільки для персоналу</span>
+                    </label>
+                    <button wire:click="addComment" class="btn btn-primary btn-sm">
+                        Додати
+                    </button>
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Права колонка --}}
+        <div class="flex flex-col gap-4">
+
+            {{-- Клієнт --}}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">Клієнт</h2>
+                    <div class="flex flex-col gap-2 text-sm">
+                        <div>
+                            <a href="{{ route('clients.show', $order->client) }}"
+                               class="font-medium link link-hover">
+                                {{ $order->client->name }}
+                            </a>
+                            @if($order->client->is_vip)
+                                <span class="badge badge-warning badge-xs ml-1">VIP</span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 7V5z"/>
+                            </svg>
+                            <a href="tel:{{ $order->client->phone }}" class="link link-hover">{{ $order->client->phone }}</a>
+                        </div>
+                        @if($order->client->email)
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <span>{{ $order->client->email }}</span>
+                        </div>
+                        @endif
+                        <div class="mt-1">
+                            <p class="text-base-content/60 text-xs">Всього заявок: {{ $order->client->orders()->count() }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Деталі заявки --}}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">Деталі</h2>
+                    <div class="flex flex-col gap-2 text-sm">
+                        @if($order->manager)
+                        <div class="flex justify-between">
+                            <span class="text-base-content/60">Прийняв:</span>
+                            <span>{{ $order->manager->name }}</span>
+                        </div>
+                        @endif
+                        @if($order->engineers->count())
+                        <div class="flex justify-between">
+                            <span class="text-base-content/60">Інженер:</span>
+                            <span>{{ $order->engineers->first()->name }}</span>
+                        </div>
+                        @endif
+                        @if($order->estimated_date)
+                        <div class="flex justify-between">
+                            <span class="text-base-content/60">Очікувана дата:</span>
+                            <span class="{{ $order->estimated_date->isPast() && !$order->isLocked() ? 'text-error font-medium' : '' }}">
+                                {{ $order->estimated_date->format('d.m.Y') }}
+                            </span>
+                        </div>
+                        @endif
+                        @if($order->prepayment > 0)
+                        <div class="flex justify-between">
+                            <span class="text-base-content/60">Передоплата:</span>
+                            <span class="font-medium">{{ number_format($order->prepayment, 0, '.', ' ') }} ₴</span>
+                        </div>
+                        @endif
+                        <div class="flex justify-between">
+                            <span class="text-base-content/60">Код перевірки:</span>
+                            <span class="font-mono">{{ $order->check_code }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{-- Призначення інженера --}}
+@if(!$order->isLocked())
+<div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+        <div class="flex items-center justify-between">
+            <h2 class="card-title text-base">Інженер</h2>
+            <button wire:click="openEngineerModal" class="btn btn-ghost btn-xs">
+                {{ $order->engineers->count() ? 'Змінити' : 'Призначити' }}
+            </button>
+        </div>
+        @if($order->engineers->count())
+            <div class="flex items-center gap-2">
+                <div class="avatar placeholder">
+                    <div class="bg-primary text-primary-content rounded-full w-8">
+                        <span class="text-xs">{{ substr($order->engineers->first()->name, 0, 1) }}</span>
+                    </div>
+                </div>
+                <span class="text-sm font-medium">{{ $order->engineers->first()->name }}</span>
+            </div>
+        @else
+            <p class="text-base-content/40 text-sm">Не призначено</p>
+        @endif
+    </div>
+</div>
+@endif
+
+            {{-- Історія статусів --}}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-base">Історія</h2>
+                    <ol class="relative border-l border-base-300 ml-2">
+                        @foreach($order->statusHistory as $history)
+                        <li class="mb-4 ml-4">
+                            <div class="absolute w-2 h-2 bg-base-300 rounded-full mt-1.5 -left-1"></div>
+                            <div class="text-xs text-base-content/40">{{ $history->created_at->format('d.m.Y H:i') }}</div>
+                            <div class="text-sm font-medium">{{ $history->status_to_label }}</div>
+                            @if($history->comment)
+                            <div class="text-xs text-base-content/60">{{ $history->comment }}</div>
+                            @endif
+                        </li>
+                        @endforeach
+                    </ol>
+                </div>
+            </div>
+
+        </div>
+    </div>
+   {{-- Модал зміни статусу --}}
+
+@if($showStatusModal)
+<div class="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/60" wire:click="$set('showStatusModal', false)"></div>
+    <div class="relative bg-base-100 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+        <h3 class="font-bold text-lg mb-4">Змінити статус</h3>
+        <div class="form-control">
+            <label class="label"><span class="label-text">Коментар (необов'язково)</span></label>
+            <textarea wire:model="statusComment"
+                      class="textarea textarea-bordered"
+                      rows="2"
+                      placeholder="Додайте коментар..."></textarea>
+        </div>
+        <div class="flex gap-2 mt-4">
+            <button wire:click="changeStatus" class="btn btn-primary flex-1">Підтвердити</button>
+            <button wire:click="$set('showStatusModal', false)" class="btn btn-ghost">Скасувати</button>
+        </div>
+    </div>
+</div>
+@endif
+
+
+{{-- Модал призначення інженера --}}
+
+@if($showEngineerModal)
+<div class="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/60" wire:click="$set('showEngineerModal', false)"></div>
+    <div class="relative bg-base-100 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
+        <h3 class="font-bold text-lg mb-4">Призначити інженера</h3>
+        <div class="form-control">
+            <select wire:model="engineerId" class="select select-bordered w-full">
+                <option value="">Оберіть інженера...</option>
+                @foreach($engineers as $engineer)
+                    <option value="{{ $engineer->id }}">{{ $engineer->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex gap-2 mt-4">
+            <button wire:click="assignEngineer" class="btn btn-primary flex-1">Призначити</button>
+            <button wire:click="$set('showEngineerModal', false)" class="btn btn-ghost">Скасувати</button>
+        </div>
+    </div>
+</div>
+@endif
+</div>

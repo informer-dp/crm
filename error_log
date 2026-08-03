@@ -1,0 +1,5 @@
+[28-May-2025 21:36:57 UTC] PHP Warning:  require(/home/jnylmamd/service.sonar.com.ua/crm/vendor/autoload.php): Failed to open stream: No such file or directory in /home/jnylmamd/service.sonar.com.ua/crm/artisan on line 18
+[28-May-2025 21:36:57 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/jnylmamd/service.sonar.com.ua/crm/vendor/autoload.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/jnylmamd/service.sonar.com.ua/crm/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /home/jnylmamd/service.sonar.com.ua/crm/artisan on line 18

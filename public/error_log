@@ -1,0 +1,25 @@
+[28-May-2025 21:12:28 UTC] PHP Warning:  require(/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:12:28 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:12:31 UTC] PHP Warning:  require(/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:12:31 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:12:33 UTC] PHP Warning:  require(/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:12:33 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:16:04 UTC] PHP Warning:  require(/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:16:04 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:31:33 UTC] PHP Warning:  require(/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
+[28-May-2025 21:31:33 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/jnylmamd/service.sonar.com.ua/crm/public/../vendor/autoload.php' (include_path='.:/opt/alt/php80/usr/share/pear:/opt/alt/php80/usr/share/php:/usr/share/pear:/usr/share/php') in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/jnylmamd/service.sonar.com.ua/crm/public/index.php on line 34
