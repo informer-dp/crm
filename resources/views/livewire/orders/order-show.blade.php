@@ -550,6 +550,75 @@
                     </div>
                 </div>
             </div>
+
+           {{-- Оплата --}}
+        <div class="card bg-base-100 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold">Оплата</h2>
+                    @if(!$order->isLocked())
+                    <button wire:click="$set('showPaymentForm', true)"
+                            class="btn btn-success btn-sm gap-1">
+                        + Прийняти
+                    </button>
+                    @endif
+                </div>
+
+                @if($order->estimate)
+                <div class="flex flex-col gap-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-base-content/60">Сума:</span>
+                        <span class="font-bold">{{ number_format($order->estimate->total, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @if($order->prepayment > 0)
+                    <div class="flex justify-between">
+                        <span class="text-base-content/60">Передоплата:</span>
+                        <span class="text-success">{{ number_format($order->prepayment, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @endif
+                    @if($order->paid_amount > 0)
+                    <div class="flex justify-between">
+                        <span class="text-base-content/60">Оплачено:</span>
+                        <span class="text-success font-medium">{{ number_format($order->paid_amount, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @endif
+                    <div class="divider my-0"></div>
+                    <div class="flex justify-between font-bold {{ $order->remaining_amount > 0 ? 'text-error' : 'text-success' }}">
+                        <span>{{ $order->remaining_amount > 0 ? 'Залишок:' : 'Сплачено повністю' }}</span>
+                        @if($order->remaining_amount > 0)
+                        <span>{{ number_format($order->remaining_amount, 0, '.', ' ') }} ₴</span>
+                        @endif
+                    </div>
+                </div>
+                @else
+                    <p class="text-sm text-base-content/40">Кошторис не створено</p>
+                @endif
+
+                {{-- Список оплат --}}
+                @if($order->payments->count())
+                <div class="mt-3 pt-3 border-t border-base-200 flex flex-col gap-2">
+                    @foreach($order->payments as $payment)
+                    <div class="flex justify-between text-xs">
+                        <div class="flex items-center gap-1">
+                            <span class="badge badge-ghost badge-xs">
+                                {{ match($payment->type) {
+                                    'prepayment' => 'Аванс',
+                                    'final' => 'Оплата',
+                                    'refund' => 'Повернення',
+                                    default => $payment->type
+                                } }}
+                            </span>
+                            <span class="text-base-content/40">{{ $payment->created_at->format('d.m H:i') }}</span>
+                        </div>
+                        <span class="font-medium {{ $payment->type === 'refund' ? 'text-error' : 'text-success' }}">
+                            {{ $payment->type === 'refund' ? '-' : '+' }}{{ number_format($payment->amount, 0, '.', ' ') }} ₴
+                        </span>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+        </div>
             {{-- Призначення інженера --}}
 @if(!$order->isLocked())
 <div class="card bg-base-100 shadow-sm">
@@ -600,7 +669,7 @@
    {{-- Модал зміни статусу --}}
 
 @if($showStatusModal)
-<div class="fixed inset-0 z-[9999] flex items-center justify-center">
+<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
     <div class="absolute inset-0 bg-black/60" wire:click="$set('showStatusModal', false)"></div>
     <div class="relative bg-base-100 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
         <h3 class="font-bold text-lg mb-4">Змінити статус</h3>
@@ -623,7 +692,7 @@
 {{-- Модал призначення інженера --}}
 
 @if($showEngineerModal)
-<div class="fixed inset-0 z-[9999] flex items-center justify-center">
+<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
     <div class="absolute inset-0 bg-black/60" wire:click="$set('showEngineerModal', false)"></div>
     <div class="relative bg-base-100 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
         <h3 class="font-bold text-lg mb-4">Призначити інженера</h3>
@@ -638,6 +707,83 @@
         <div class="flex gap-2 mt-4">
             <button wire:click="assignEngineer" class="btn btn-primary flex-1">Призначити</button>
             <button wire:click="$set('showEngineerModal', false)" class="btn btn-ghost">Скасувати</button>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Форма оплати --}}
+@if($showPaymentForm)
+<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
+    <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:400px;margin:16px">
+        <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px">Прийняти оплату</h3>
+        <p style="font-size:14px;color:#666;margin-bottom:16px">
+            Заявка {{ $order->number }}
+            @if($order->estimate)
+                · Залишок: <strong style="color:red">{{ number_format($order->remaining_amount, 0, '.', ' ') }} ₴</strong>
+            @endif
+        </p>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+                <label style="font-size:14px;display:block;margin-bottom:4px">Сума *</label>
+                <input wire:model="paymentAmount" type="number" min="0"
+                       style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:16px"
+                       placeholder="{{ $order->remaining_amount }}"/>
+                @error('paymentAmount')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+            </div>
+
+            <div>
+                <label style="font-size:14px;display:block;margin-bottom:4px">Тип оплати</label>
+                <select wire:model="paymentType"
+                        style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                    <option value="prepayment">Передоплата</option>
+                    <option value="final">Фінальна оплата</option>
+                    <option value="refund">Повернення</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-size:14px;display:block;margin-bottom:8px">Спосіб оплати</label>
+                <div style="display:flex;gap:16px">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                        <input type="radio" wire:model="paymentMethod" value="cash"/>
+                        <span style="font-size:14px">Готівка</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                        <input type="radio" wire:model="paymentMethod" value="terminal"/>
+                        <span style="font-size:14px">Термінал</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                        <input type="radio" wire:model="paymentMethod" value="transfer"/>
+                        <span style="font-size:14px">Переказ</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label style="font-size:14px;display:block;margin-bottom:4px">Рахунок</label>
+                <select wire:model="paymentAccountId"
+                        style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                    @foreach(\App\Models\Account::active()->get() as $account)
+                        <option value="{{ $account->id }}">
+                            {{ $account->name }} ({{ number_format($account->balance, 0, '.', ' ') }} ₴)
+                        </option>
+                    @endforeach
+                </select>
+                @error('paymentAccountId')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+            </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:16px">
+            <button wire:click="savePayment"
+                    style="flex:1;padding:10px;background:#22c55e;color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:500">
+                Зберегти оплату
+            </button>
+            <button wire:click="$set('showPaymentForm', false)"
+                    style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer">
+                Скасувати
+            </button>
         </div>
     </div>
 </div>

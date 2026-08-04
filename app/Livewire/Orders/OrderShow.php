@@ -37,6 +37,13 @@ class OrderShow extends Component
     public string $partCost = '';
     public string $partQuantity = '1';
     public bool $partIsOwn = false;
+    
+    // ── Оплата ────────────────────────────────
+    public bool $showPaymentForm = false;
+    public string $paymentAmount = '';
+    public string $paymentMethod = 'cash';
+    public string $paymentType = 'final';
+    public ?int $paymentAccountId = null;
 
     public function mount(Order $order): void
     {
@@ -52,6 +59,7 @@ class OrderShow extends Component
             'comments.user',
             'statusHistory.user',
         ]);
+        $this->paymentAccountId = \App\Models\Account::where('type', 'cash')->first()?->id;
     }
 
     // ── Зміна статусу ─────────────────────────
@@ -251,5 +259,47 @@ public function updateDiscount(string $discount, string $type): void
         return view('livewire.orders.order-show', compact('engineers'))
             ->extends('layouts.app')
             ->section('content');
+    }
+    public function savePayment(): void
+    {
+        $this->validate([
+            'paymentAmount'    => 'required|numeric|min:0.01',
+            'paymentAccountId' => 'required|exists:accounts,id',
+        ], [
+            'paymentAmount.required' => 'Введіть суму',
+            'paymentAmount.min'      => 'Сума має бути більше 0',
+        ]);
+
+        $account = \App\Models\Account::findOrFail($this->paymentAccountId);
+        $amount  = (float)$this->paymentAmount;
+        $isRefund = $this->paymentType === 'refund';
+
+        $transaction = \App\Models\Transaction::create([
+            'account_id'       => $account->id,
+            'type'             => $isRefund ? 'expense' : 'income',
+            'amount'           => $amount,
+            'balance_after'    => $account->balance + ($isRefund ? -$amount : $amount),
+            'reference_type'   => 'App\Models\Order',
+            'reference_id'     => $this->order->id,
+            'user_id'          => auth()->id(),
+            'description'      => 'Оплата по заявці ' . $this->order->number,
+            'transaction_date' => now()->toDateString(),
+        ]);
+
+        $account->increment('balance', $isRefund ? -$amount : $amount);
+
+        \App\Models\OrderPayment::create([
+            'order_id'       => $this->order->id,
+            'account_id'     => $account->id,
+            'transaction_id' => $transaction->id,
+            'amount'         => $amount,
+            'payment_method' => $this->paymentMethod,
+            'type'           => $this->paymentType,
+            'user_id'        => auth()->id(),
+        ]);
+
+        $this->order->refresh()->load('payments');
+        $this->showPaymentForm = false;
+        $this->paymentAmount = '';
     }
 }
