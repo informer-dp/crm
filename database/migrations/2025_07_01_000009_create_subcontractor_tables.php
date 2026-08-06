@@ -31,7 +31,7 @@ return new class extends Migration
             $table->foreignId('subcontractor_order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('estimate_work_id')->constrained('estimate_works')->cascadeOnDelete();
 
-            $table->unique(['subcontractor_order_id', 'estimate_work_id']);
+            $table->unique(['subcontractor_order_id', 'estimate_work_id'], 'sub_order_works_unique');
         });
     }
 

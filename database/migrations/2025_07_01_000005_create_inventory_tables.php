@@ -126,7 +126,7 @@ return new class extends Migration
             $table->integer('qty')->comment('+ надходження, - витрата');
             $table->decimal('unit_cost', 10, 2)->default(0)->comment('Собівартість одиниці');
             $table->decimal('unit_price', 10, 2)->default(0)->comment('Роздрібна ціна');
-            $table->nullableMorphs('reference')->comment('order, purchase, donor_device');
+            $table->nullableMorphs('reference');//'order, purchase, donor_device'
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete()
                   ->comment('Хто провів операцію');
             $table->text('notes')->nullable();
