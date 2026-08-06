@@ -152,6 +152,9 @@
                                 <p class="text-xs text-base-content/60">{{ $order->client->name }}</p>
                             </div>
                         </div>
+                        <div>
+                                <p>{{ $order->device->full_name}}</p>
+                        </div>
                         <div class="text-right">
                             @php
                                 $colors = [

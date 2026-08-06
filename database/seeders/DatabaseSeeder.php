@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             DeviceTypesSeeder::class,
             ExpenseCategoriesSeeder::class,
             WarrantyRulesSeeder::class,
+            PartCategoriesSeeder::class,
             AccountsSeeder::class,
             NotificationEventsSeeder::class,
             SettingsSeeder::class,
