@@ -16,7 +16,7 @@ class OrderIndex extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $status = '';
+    public string $status = 'active';
     public string $type = '';
     public string $priority = '';
     public string $sortBy = 'created_at';
@@ -66,7 +66,8 @@ class OrderIndex extends Component
     $orders = Order::query()
         ->with(['client', 'device.brand', 'device.model', 'engineers'])
         ->when($this->search, fn($q) => $q->search($this->search))
-        ->when($this->status, fn($q) => $q->where('status', $this->status))
+        ->when($this->status === 'active', fn($q) => $q->active())
+        ->when($this->status && $this->status !== 'active', fn($q) => $q->where('status', $this->status))
         ->when($this->deviceType, fn($q) => 
                 $q->whereHas('device', fn($d) => 
                     $d->whereHas('deviceType', fn($t) => 

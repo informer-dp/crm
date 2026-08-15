@@ -60,7 +60,69 @@ class OrderShow extends Component
             'statusHistory.user',
         ]);
         $this->paymentAccountId = \App\Models\Account::where('type', 'cash')->first()?->id;
+        $this->expenseDate = now()->format('Y-m-d');
+        $this->expenseAccountId = \App\Models\Account::where('type', 'cash')->first()?->id;
     }
+
+    // ── Витрата по заявці ─────────────────────
+    public bool $showExpenseForm = false;
+    public string $expenseDescription = '';
+    public string $expenseAmount = '';
+    public ?int $expenseCategoryId = null;
+    public ?int $expenseAccountId = null;
+    public string $expenseDate = '';
+    public bool $expenseIsPaid = true;
+
+    public function saveExpense(): void
+{
+    $this->validate([
+        'expenseDescription' => 'required|min:2',
+        'expenseAmount'      => 'required|numeric|min:0.01',
+        'expenseCategoryId'  => 'required|exists:expense_categories,id',
+        'expenseDate'        => 'required|date',
+    ], [
+        'expenseDescription.required' => 'Введіть опис витрати',
+        'expenseAmount.required'      => 'Введіть суму',
+        'expenseCategoryId.required'  => 'Оберіть категорію',
+    ]);
+
+    $expense = \App\Models\Expense::create([
+        'category_id'  => $this->expenseCategoryId,
+        'order_id'     => $this->order->id,
+        'account_id'   => $this->expenseIsPaid ? $this->expenseAccountId : null,
+        'description'  => $this->expenseDescription,
+        'amount'       => (float)$this->expenseAmount,
+        'is_paid'      => $this->expenseIsPaid,
+        'expense_date' => $this->expenseDate,
+        'created_by'   => auth()->id(),
+    ]);
+
+    if ($this->expenseIsPaid && $this->expenseAccountId) {
+        $account = \App\Models\Account::findOrFail($this->expenseAccountId);
+        $amount  = (float)$this->expenseAmount;
+
+        $transaction = \App\Models\Transaction::create([
+            'account_id'       => $account->id,
+            'type'             => 'expense',
+            'amount'           => $amount,
+            'balance_after'    => $account->balance - $amount,
+            'reference_type'   => 'App\Models\Expense',
+            'reference_id'     => $expense->id,
+            'user_id'          => auth()->id(),
+            'description'      => $this->expenseDescription . ' (Заявка ' . $this->order->number . ')',
+            'transaction_date' => $this->expenseDate,
+        ]);
+
+        $account->decrement('balance', $amount);
+        $expense->update(['transaction_id' => $transaction->id]);
+    }
+
+    $this->expenseDescription = '';
+    $this->expenseAmount = '';
+    $this->expenseCategoryId = null;
+    $this->expenseDate = now()->format('Y-m-d');
+    $this->showExpenseForm = false;
+}
 
     // ── Зміна статусу ─────────────────────────
 
@@ -256,9 +318,22 @@ public function updateDiscount(string $discount, string $type): void
     {
         $engineers = User::role('engineer')->active()->get();
 
-        return view('livewire.orders.order-show', compact('engineers'))
+        $expenseCategories = \App\Models\ExpenseCategory::whereNull('parent_id')
+            ->with('children')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('livewire.orders.order-show', compact('engineers', 'expenseCategories'))
             ->extends('layouts.app')
             ->section('content');
+    }
+    public function getOrderExpenses()
+    {
+        return \App\Models\Expense::where('order_id', $this->order->id)
+            ->with('category')
+            ->orderByDesc('expense_date')
+            ->get();
     }
     public function savePayment(): void
     {

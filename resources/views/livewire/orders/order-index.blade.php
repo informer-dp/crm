@@ -41,6 +41,7 @@
                 {{-- Статус --}}
                 <select wire:model.live="status" class="select select-bordered w-40">
                     <option value="">Всі статуси</option>
+                    <option value="active">Активні</option>
                     <option value="new">Нова</option>
                     <option value="diagnosed">Діагностика</option>
                     <option value="approved">Узгоджено</option>

@@ -21,7 +21,7 @@
     </div>
 
     {{-- Рахунки --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-3 gap-4 mb-6">
         @foreach($accounts as $account)
         <div class="card bg-base-100 shadow-sm">
             <div class="card-body p-4">
@@ -264,6 +264,42 @@
                     @error('expenseCategoryId')<span class="text-error text-xs">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- Прив'язка до заявки --}}
+                <div>
+                    <label style="font-size:13px;display:block;margin-bottom:4px">
+                        Прив'язати до заявки (необов'язково)
+                    </label>
+                    @if($expenseOrderId)
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px">
+                            <span style="font-size:14px;font-weight:500">{{ $expenseOrderSearch }}</span>
+                            <button wire:click="clearExpenseOrder"
+                                    style="background:none;border:none;cursor:pointer;color:#666">✕</button>
+                        </div>
+                    @else
+                        <div style="position:relative">
+                            <input wire:model.live.debounce.300ms="expenseOrderSearch"
+                                type="text"
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"
+                                placeholder="Номер або клієнт..."
+                                autocomplete="off"/>
+                            @if($showExpenseOrderDropdown)
+                            <div style="position:absolute;z-index:100;width:100%;background:white;border:1px solid #ddd;border-radius:8px;margin-top:4px;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
+                                @forelse(\App\Models\Order::search($expenseOrderSearch)->with('client')->limit(5)->get() as $ord)
+                                    <button wire:click="selectExpenseOrder({{ $ord->id }}, '{{ $ord->number }}')"
+                                            style="width:100%;text-align:left;padding:8px 12px;border:none;background:none;cursor:pointer;display:flex;justify-content:space-between"
+                                            onmouseover="this.style.background='#f5f5f5'"
+                                            onmouseout="this.style.background='none'">
+                                        <span style="font-weight:500;font-size:13px">{{ $ord->number }}</span>
+                                        <span style="color:#666;font-size:12px">{{ $ord->client->name }}</span>
+                                    </button>
+                                @empty
+                                    <div style="padding:8px 12px;color:#666;font-size:13px">Не знайдено</div>
+                                @endforelse
+                            </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text">Рахунок</span></label>
                     <select wire:model="expenseAccountId" class="select select-bordered select-sm">

@@ -66,5 +66,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('orders.print.warranty'); 
     Route::get('/orders/{order}/print/{type}', [App\Http\Controllers\PrintController::class, 'receipt'])
         ->name('orders.print');
-       
+    Route::get('/references', App\Livewire\References\ReferencesIndex::class)
+        ->middleware('can:references.manage')
+        ->name('references.index');   
 });

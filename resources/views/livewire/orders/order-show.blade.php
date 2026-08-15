@@ -33,7 +33,9 @@
                 {{ $order->type_label }} · Створено {{ $order->created_at->format('d.m.Y H:i') }}
             </p>
         </div>
-        <div class="flex gap-2">
+    <div class="flex gap-2">
+        
+            
     {{-- Друк квитанції прийому --}}
     <a href="{{ route('orders.print', [$order, 'acceptance']) }}"
        target="_blank"
@@ -73,7 +75,7 @@
         </div>
     </div>
 
-    {{-- Кнопки зміни статусу --}}
+   {{-- Кнопки зміни статусу --}}
     @if(!$order->isLocked())
     <div class="flex flex-wrap gap-2 mb-6">
         @foreach(\App\Models\Order::ACTIVE_STATUSES as $status)
@@ -103,6 +105,12 @@
                 </button>
             @endif
         @endforeach
+        @if($order->canTransitionTo('issued'))
+            <button wire:click="openStatusModal('issued')"
+                    class="btn btn-sm btn-neutral">
+                → Видати
+            </button>
+        @endif
         @if($order->canTransitionTo('cancelled'))
             <button wire:click="openStatusModal('cancelled')"
                     class="btn btn-sm btn-error btn-outline">
@@ -110,29 +118,31 @@
             </button>
         @endif
     </div>
+    @endif
+
     {{-- Inline форма зміни статусу --}}
-        @if($showStatusModal)
-        <div class="card bg-base-100 shadow-sm mb-4 border-2 border-primary">
-            <div class="card-body py-3">
-                <div class="flex items-center gap-3">
-                    <div class="flex-1">
-                        <textarea wire:model="statusComment"
-                                class="textarea textarea-bordered textarea-sm w-full"
-                                rows="1"
-                                placeholder="Коментар до зміни статусу (необов'язково)..."></textarea>
-                    </div>
-                    <div class="flex gap-2 flex-shrink-0">
-                        <button wire:click="changeStatus" class="btn btn-primary btn-sm">
-                            Підтвердити
-                        </button>
-                        <button wire:click="$set('showStatusModal', false)" class="btn btn-ghost btn-sm">
-                            ✕
-                        </button>
-                    </div>
+    @if($showStatusModal)
+    <div class="card bg-base-100 shadow-sm mb-4 border-2 border-primary">
+        <div class="card-body py-3">
+            <div class="flex items-center gap-3">
+                <div class="flex-1">
+                    <textarea wire:model="statusComment"
+                              class="textarea textarea-bordered textarea-sm w-full"
+                              rows="1"
+                              placeholder="Коментар до зміни статусу (необов'язково)..."></textarea>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                    <button wire:click="changeStatus" class="btn btn-primary btn-sm">
+                        Підтвердити
+                    </button>
+                    <button wire:click="$set('showStatusModal', false)" class="btn btn-ghost btn-sm">
+                        ✕
+                    </button>
                 </div>
             </div>
         </div>
-        @endif
+    </div>
+    
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -425,7 +435,63 @@
         @endif
     </div>
 </div>
+            {{-- Витрати по заявці --}}
+            @php $orderExpenses = $this->getOrderExpenses(); @endphp
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="card-title text-base">Витрати по заявці</h2>
+                        <span class="text-sm text-base-content/60">
+                            {{ $orderExpenses->count() }} позицій
+                        </span>
+                    </div>
 
+                    @if($orderExpenses->count())
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Опис</th>
+                                    <th>Категорія</th>
+                                    <th>Статус</th>
+                                    <th class="text-right">Сума</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($orderExpenses as $expense)
+                                <tr>
+                                    <td class="text-xs">{{ \Carbon\Carbon::parse($expense->expense_date)->format('d.m.Y') }}</td>
+                                    <td class="text-sm">{{ $expense->description }}</td>
+                                    <td class="text-xs text-base-content/60">{{ $expense->category->name }}</td>
+                                    <td>
+                                        @if($expense->is_paid)
+                                            <span class="badge badge-success badge-xs">Оплачено</span>
+                                        @else
+                                            <span class="badge badge-warning badge-xs">Не оплачено</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-right font-medium text-error text-sm">
+                                        -{{ number_format($expense->amount, 0, '.', ' ') }} ₴
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-right font-bold text-sm">Всього витрат:</td>
+                                    <td class="text-right font-bold text-error">
+                                        -{{ number_format($orderExpenses->sum('amount'), 0, '.', ' ') }} ₴
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    @else
+                        <p class="text-sm text-base-content/40">Витрат по цій заявці немає</p>
+                    @endif
+                </div>
+            </div>
             {{-- Коментарі --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
@@ -554,14 +620,21 @@
            {{-- Оплата --}}
         <div class="card bg-base-100 shadow-sm">
             <div class="card-body p-4">
-                <div class="flex items-center justify-between mb-3">
+                
+                <div class="flex items-center justify-between">
                     <h2 class="font-bold">Оплата</h2>
-                    @if(!$order->isLocked())
-                    <button wire:click="$set('showPaymentForm', true)"
-                            class="btn btn-success btn-sm gap-1">
-                        + Прийняти
-                    </button>
-                    @endif
+                    <div class="flex gap-1">
+                        <button wire:click="$set('showExpenseForm', true)"
+                                class="btn btn-error btn-sm gap-1">
+                            − Витрата
+                        </button>
+                        @if(!$order->isLocked())
+                        <button wire:click="$set('showPaymentForm', true)"
+                                class="btn btn-success btn-sm gap-1">
+                            + Прийняти
+                        </button>
+                        @endif
+                    </div>
                 </div>
 
                 @if($order->estimate)
@@ -788,4 +861,82 @@
     </div>
 </div>
 @endif
+
+    {{-- Форма витрати по заявці --}}
+        @if($showExpenseForm)
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
+            <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;margin:16px">
+                <h3 style="font-size:18px;font-weight:bold;margin-bottom:4px">Витрата по заявці</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:16px">{{ $order->number }}</p>
+
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div>
+                        <label style="font-size:13px;display:block;margin-bottom:4px">Опис *</label>
+                        <input wire:model="expenseDescription" type="text"
+                            style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"
+                            placeholder="Закупівля запчастини, доставка, підряд..."/>
+                        @error('expenseDescription')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                        <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">Сума *</label>
+                            <input wire:model="expenseAmount" type="number" min="0"
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
+                            @error('expenseAmount')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">Дата *</label>
+                            <input wire:model="expenseDate" type="date"
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-size:13px;display:block;margin-bottom:4px">Категорія *</label>
+                        <select wire:model="expenseCategoryId"
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                            <option value="">Оберіть категорію...</option>
+                            @foreach($expenseCategories as $cat)
+                                <optgroup label="{{ $cat->name }}">
+                                    @foreach($cat->children as $child)
+                                        <option value="{{ $child->id }}">{{ $child->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                        @error('expenseCategoryId')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div>
+                        <label style="font-size:13px;display:block;margin-bottom:4px">Рахунок</label>
+                        <select wire:model="expenseAccountId"
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                            @foreach(\App\Models\Account::active()->get() as $account)
+                                <option value="{{ $account->id }}">
+                                    {{ $account->name }} ({{ number_format($account->balance, 0, '.', ' ') }} ₴)
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                        <input wire:model="expenseIsPaid" type="checkbox" style="width:16px;height:16px"/>
+                        <span style="font-size:14px">Вже оплачено</span>
+                    </label>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:16px">
+                    <button wire:click="saveExpense"
+                            style="flex:1;padding:10px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500">
+                        Зберегти витрату
+                    </button>
+                    <button wire:click="$set('showExpenseForm', false)"
+                            style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer">
+                        Скасувати
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
 </div>

@@ -42,6 +42,11 @@ class FinanceIndex extends Component
     public string $transferAmount = '';
     public string $transferNotes = '';
 
+    // Пошук заявки для витрати
+    public string $expenseOrderSearch = '';
+    public ?int $expenseOrderId = null;
+    public bool $showExpenseOrderDropdown = false;
+
     public function mount(): void
     {
         $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
@@ -51,6 +56,23 @@ class FinanceIndex extends Component
         $this->expenseAccountId = Account::where('type', 'cash')->first()?->id;
     }
 
+    public function updatedExpenseOrderSearch(): void
+    {
+        $this->showExpenseOrderDropdown = strlen($this->expenseOrderSearch) >= 2;
+    }
+
+    public function selectExpenseOrder(int $id, string $number): void
+    {
+        $this->expenseOrderId = $id;
+        $this->expenseOrderSearch = $number;
+        $this->showExpenseOrderDropdown = false;
+    }
+
+    public function clearExpenseOrder(): void
+    {
+        $this->expenseOrderId = null;
+        $this->expenseOrderSearch = '';
+    }
     // ── Оплата по заявці ──────────────────────
 
     public function openPaymentModal(int $orderId, float $amount = 0): void
@@ -128,6 +150,7 @@ class FinanceIndex extends Component
         $expense = Expense::create([
             'category_id'  => $this->expenseCategoryId,
             'account_id'   => $this->expenseIsPaid ? $this->expenseAccountId : null,
+            'order_id'     => $this->expenseOrderId,
             'description'  => $this->expenseDescription,
             'amount'       => (float)$this->expenseAmount,
             'is_paid'      => $this->expenseIsPaid,
@@ -161,6 +184,8 @@ class FinanceIndex extends Component
         $this->expenseCategoryId = null;
         $this->expenseDate = now()->format('Y-m-d');
         $this->showExpenseForm = false;
+        $this->expenseOrderId = null;
+        $this->expenseOrderSearch = '';
     }
 
     // ── Переказ між рахунками ─────────────────

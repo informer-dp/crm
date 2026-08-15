@@ -11,7 +11,7 @@ class ClientIndex extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $type = '';
+    public string $clientType = '';
     public bool $showVip = false;
     public bool $showBlacklisted = false;
     public string $sortBy = 'created_at';
@@ -19,7 +19,7 @@ class ClientIndex extends Component
 
     protected $queryString = [
         'search'          => ['except' => ''],
-        'type'            => ['except' => ''],
+        'clientType'            => ['except' => ''],
         'showVip'         => ['except' => false],
         'showBlacklisted' => ['except' => false],
     ];
@@ -39,7 +39,7 @@ class ClientIndex extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'type', 'showVip', 'showBlacklisted']);
+        $this->reset(['search', 'clientType', 'showVip', 'showBlacklisted']);
         $this->resetPage();
     }
 
@@ -48,7 +48,7 @@ class ClientIndex extends Component
         $clients = Client::query()
             ->withCount('orders')
             ->when($this->search, fn($q) => $q->search($this->search))
-            ->when($this->type, fn($q) => $q->where('type', $this->type))
+            ->when($this->clientType, fn($q) => $q->where('clientType', $this->clientType))
             ->when($this->showVip, fn($q) => $q->where('is_vip', true))
             ->when($this->showBlacklisted, fn($q) => $q->where('is_blacklisted', true))
             ->orderBy($this->sortBy, $this->sortDir)
