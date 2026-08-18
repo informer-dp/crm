@@ -30,190 +30,123 @@
                             ->count();
     @endphp
 
-    {{-- Картки статистики --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {{-- Картки статистики --}}
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
 
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-base-content/60 text-sm">Активних заявок</p>
-                        <p class="text-3xl font-bold mt-1">{{ $activeOrders }}</p>
-                    </div>
-                    <div class="text-primary opacity-60">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                    </div>
-                </div>
+            <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <p style="font-size:13px;color:#666;margin-bottom:4px">Активних заявок</p>
+                <p style="font-size:32px;font-weight:bold">{{ $activeOrders }}</p>
             </div>
-        </div>
 
-        <div class="card bg-success/10 shadow-sm">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-base-content/60 text-sm">Готові до видачі</p>
-                        <p class="text-3xl font-bold mt-1 text-success">{{ $readyOrders }}</p>
-                    </div>
-                    <div class="text-success opacity-60">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                </div>
+            <div style="background:{{ $readyOrders > 0 ? '#f0fdf4' : 'white' }};border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <p style="font-size:13px;color:#666;margin-bottom:4px">Готові до видачі</p>
+                <p style="font-size:32px;font-weight:bold;color:{{ $readyOrders > 0 ? '#16a34a' : '#000' }}">{{ $readyOrders }}</p>
                 @if($readyOrders > 0)
-                <a href="{{ route('orders.index', ['status' => 'ready']) }}" class="text-xs text-success link mt-1">
-                    Переглянути →
-                </a>
+                <a href="{{ route('orders.index', ['status' => 'ready']) }}"
+                style="font-size:12px;color:#16a34a;text-decoration:underline">Переглянути →</a>
                 @endif
             </div>
-        </div>
 
-        <div class="card {{ $urgentOrders > 0 ? 'bg-error/10' : 'bg-base-100' }} shadow-sm">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-base-content/60 text-sm">Термінових</p>
-                        <p class="text-3xl font-bold mt-1 {{ $urgentOrders > 0 ? 'text-error' : '' }}">{{ $urgentOrders }}</p>
-                    </div>
-                    <div class="{{ $urgentOrders > 0 ? 'text-error' : 'text-base-content/30' }} opacity-60">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                    </div>
-                </div>
+            <div style="background:{{ $urgentOrders > 0 ? '#fef2f2' : 'white' }};border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <p style="font-size:13px;color:#666;margin-bottom:4px">Термінових</p>
+                <p style="font-size:32px;font-weight:bold;color:{{ $urgentOrders > 0 ? '#dc2626' : '#000' }}">{{ $urgentOrders }}</p>
             </div>
-        </div>
 
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-base-content/60 text-sm">Сьогодні прийнято</p>
-                        <p class="text-3xl font-bold mt-1">{{ $todayOrders }}</p>
-                    </div>
-                    <div class="text-info opacity-60">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                </div>
+            <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <p style="font-size:13px;color:#666;margin-bottom:4px">Сьогодні прийнято</p>
+                <p style="font-size:32px;font-weight:bold">{{ $todayOrders }}</p>
             </div>
+
         </div>
 
-    </div>
+        {{-- Місячна статистика --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
 
-    {{-- Місячна статистика --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <p class="text-base-content/60 text-sm">Виручка за {{ now()->translatedFormat('F') }}</p>
-                <p class="text-3xl font-bold mt-1">{{ number_format($monthRevenue, 0, '.', ' ') }} ₴</p>
-                <p class="text-base-content/40 text-xs mt-1">{{ $monthOrders }} замовлень</p>
+            <div style="background:#6366f1;border-radius:12px;padding:16px;color:white">
+                <p style="font-size:13px;opacity:0.8;margin-bottom:4px">Виручка за {{ now()->format('F') }}</p>
+                <p style="font-size:28px;font-weight:bold">{{ number_format($monthRevenue, 0, '.', ' ') }} ₴</p>
+                <p style="font-size:12px;opacity:0.6;margin-top:4px">{{ $monthOrders }} замовлень</p>
             </div>
-        </div>
 
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <p class="text-base-content/60 text-sm">Середній чек</p>
-                <p class="text-3xl font-bold mt-1">
+            <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <p style="font-size:13px;color:#666;margin-bottom:4px">Середній чек</p>
+                <p style="font-size:28px;font-weight:bold">
                     {{ $monthOrders > 0 ? number_format($monthRevenue / $monthOrders, 0, '.', ' ') : 0 }} ₴
                 </p>
-                <p class="text-base-content/40 text-xs mt-1">за {{ now()->translatedFormat('F') }}</p>
+                <p style="font-size:12px;color:#999;margin-top:4px">за {{ now()->format('F') }}</p>
             </div>
-        </div>
 
-    </div>
+        </div>
 
     {{-- Останні заявки і статуси --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
 
-        {{-- Останні заявки --}}
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="card-title text-base">Останні заявки</h2>
-                    <a href="{{ route('orders.index') }}" class="text-xs link link-primary">Всі →</a>
+            {{-- Останні заявки --}}
+            <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <span style="font-weight:bold">Останні заявки</span>
+                    <a href="{{ route('orders.index') }}" style="font-size:12px;color:#6366f1;text-decoration:none">Всі →</a>
                 </div>
-                <div class="flex flex-col gap-2">
-                    @foreach(\App\Models\Order::with(['client','device.brand','device.model'])->latest()->limit(6)->get() as $order)
-                    <a href="{{ route('orders.show', $order) }}"
-                       class="flex items-center justify-between p-2 rounded-lg hover:bg-base-200 transition-colors">
-                        <div class="flex items-center gap-3">
-                            @if($order->isUrgent())
-                                <span class="w-2 h-2 bg-error rounded-full flex-shrink-0"></span>
-                            @else
-                                <span class="w-2 h-2 bg-base-300 rounded-full flex-shrink-0"></span>
-                            @endif
-                            <div>
-                                <p class="text-sm font-medium font-mono">{{ $order->number }}</p>
-                                <p class="text-xs text-base-content/60">{{ $order->client->name }}</p>
-                            </div>
-                        </div>
+                @foreach(\App\Models\Order::with(['client','device.brand','device.model'])->latest()->limit(6)->get() as $order)
+                <a href="{{ route('orders.show', $order) }}"
+                style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;text-decoration:none;color:inherit;margin-bottom:4px"
+                onmouseover="this.style.background='#f5f5f5'"
+                onmouseout="this.style.background='transparent'">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="width:8px;height:8px;border-radius:50%;background:{{ $order->isUrgent() ? '#dc2626' : '#d1d5db' }};flex-shrink:0"></span>
                         <div>
-                                <p>{{ $order->device->full_name}}</p>
+                            <div style="font-size:13px;font-weight:500;font-family:monospace">{{ $order->number }}</div>
+                            <div style="font-size:11px;color:#666">{{ $order->client->name }}</div>
                         </div>
-                        <div class="text-right">
-                            @php
-                                $colors = [
-                                    'new'           => 'badge-info',
-                                    'diagnosed'     => 'badge-warning',
-                                    'approved'      => 'badge-warning',
-                                    'in_progress'   => 'badge-primary',
-                                    'waiting_parts' => 'badge-ghost',
-                                    'ready'         => 'badge-success',
-                                    'issued'        => 'badge-neutral',
-                                    'cancelled'     => 'badge-error',
-                                ];
-                            @endphp
-                            <span class="badge {{ $colors[$order->status] ?? 'badge-ghost' }} badge-xs">
-                                {{ $order->status_label }}
-                            </span>
-                            <p class="text-xs text-base-content/40 mt-1">{{ $order->created_at->format('d.m H:i') }}</p>
-                        </div>
-                    </a>
-                    @endforeach
-                </div>
+                    </div>
+                    <div style="text-align:right">
+                        @php
+                            $colors = [
+                                'new' => '#3b82f6', 'diagnosed' => '#f59e0b',
+                                'approved' => '#f59e0b', 'in_progress' => '#6366f1',
+                                'waiting_parts' => '#9ca3af', 'ready' => '#16a34a',
+                                'issued' => '#6b7280', 'cancelled' => '#dc2626',
+                            ];
+                        @endphp
+                        <span style="font-size:11px;padding:2px 6px;border-radius:9999px;background:{{ $colors[$order->status] ?? '#9ca3af' }}20;color:{{ $colors[$order->status] ?? '#9ca3af' }}">
+                            {{ $order->status_label }}
+                        </span>
+                        <div style="font-size:11px;color:#999;margin-top:2px">{{ $order->created_at->format('d.m H:i') }}</div>
+                    </div>
+                </a>
+                @endforeach
             </div>
-        </div>
 
-        {{-- Розподіл по статусах --}}
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title text-base mb-3">Заявки по статусах</h2>
+            {{-- Розподіл по статусах --}}
+            <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                <div style="font-weight:bold;margin-bottom:12px">Заявки по статусах</div>
                 @php
                     $statuses = [
-                        'new'           => ['label' => 'Нові',              'color' => 'bg-info'],
-                        'diagnosed'     => ['label' => 'Діагностика',       'color' => 'bg-warning'],
-                        'approved'      => ['label' => 'Узгоджено',         'color' => 'bg-warning'],
-                        'in_progress'   => ['label' => 'В роботі',          'color' => 'bg-primary'],
-                        'waiting_parts' => ['label' => 'Очікує деталей',    'color' => 'bg-base-300'],
-                        'ready'         => ['label' => 'Готові',            'color' => 'bg-success'],
+                        'new'           => ['label' => 'Нові',           'color' => '#3b82f6'],
+                        'diagnosed'     => ['label' => 'Діагностика',    'color' => '#f59e0b'],
+                        'approved'      => ['label' => 'Узгоджено',      'color' => '#f59e0b'],
+                        'in_progress'   => ['label' => 'В роботі',       'color' => '#6366f1'],
+                        'waiting_parts' => ['label' => 'Очікує деталей', 'color' => '#9ca3af'],
+                        'ready'         => ['label' => 'Готові',         'color' => '#16a34a'],
                     ];
                     $total = \App\Models\Order::active()->count() ?: 1;
                 @endphp
-                <div class="flex flex-col gap-3">
-                    @foreach($statuses as $status => $info)
-                    @php $count = \App\Models\Order::byStatus($status)->count(); @endphp
-                    @if($count > 0)
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>{{ $info['label'] }}</span>
-                            <span class="font-medium">{{ $count }}</span>
-                        </div>
-                        <div class="w-full bg-base-200 rounded-full h-2">
-                            <div class="{{ $info['color'] }} h-2 rounded-full transition-all"
-                                 style="width: {{ min(100, round($count / $total * 100)) }}%"></div>
-                        </div>
+                @foreach($statuses as $status => $info)
+                @php $count = \App\Models\Order::byStatus($status)->count(); @endphp
+                @if($count > 0)
+                <div style="margin-bottom:10px">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                        <span>{{ $info['label'] }}</span>
+                        <span style="font-weight:600">{{ $count }}</span>
                     </div>
-                    @endif
-                    @endforeach
+                    <div style="background:#f3f4f6;border-radius:9999px;height:6px">
+                        <div style="background:{{ $info['color'] }};height:6px;border-radius:9999px;width:{{ min(100, round($count / $total * 100)) }}%"></div>
+                    </div>
                 </div>
+                @endif
+                @endforeach
             </div>
-        </div>
 
-    </div>
+        </div>
 </div>
 @endsection

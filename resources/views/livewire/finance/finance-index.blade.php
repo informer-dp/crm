@@ -21,54 +21,41 @@
     </div>
 
     {{-- Рахунки --}}
-    <div class="grid grid-cols-3 gap-4 mb-6">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">
         @foreach($accounts as $account)
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-base-content/60 text-sm">{{ $account->name }}</p>
-                        <p class="text-2xl font-bold mt-1 {{ $account->balance < 0 ? 'text-error' : '' }}">
-                            {{ number_format($account->balance, 0, '.', ' ') }} ₴
-                        </p>
-                    </div>
-                    <div class="text-base-content/20">
-                        @if($account->type === 'cash')
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        @elseif($account->type === 'terminal')
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                            </svg>
-                        @else
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
-                            </svg>
-                        @endif
-                    </div>
+        <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                    <p style="font-size:13px;color:#666;margin-bottom:4px">{{ $account->name }}</p>
+                    <p style="font-size:26px;font-weight:bold;color:{{ $account->balance < 0 ? '#dc2626' : '#000' }}">
+                        {{ number_format($account->balance, 0, '.', ' ') }} ₴
+                    </p>
+                </div>
+                <div style="opacity:0.2;font-size:32px">
+                    @if($account->type === 'cash') 💵
+                    @elseif($account->type === 'terminal') 💳
+                    @else 🏦
+                    @endif
                 </div>
             </div>
         </div>
         @endforeach
     </div>
 
-    {{-- Загальний баланс і статистика за період --}}
-    <div class="card bg-primary text-primary-content shadow-sm mb-6">
-        <div class="card-body p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <p class="text-primary-content/70 text-sm">Загальний баланс</p>
-                    <p class="text-3xl font-bold">{{ number_format($totalBalance, 0, '.', ' ') }} ₴</p>
-                </div>
-                <div>
-                    <p class="text-primary-content/70 text-sm">Надходження за період</p>
-                    <p class="text-2xl font-bold text-success">+{{ number_format($periodIncome, 0, '.', ' ') }} ₴</p>
-                </div>
-                <div>
-                    <p class="text-primary-content/70 text-sm">Витрати за період</p>
-                    <p class="text-2xl font-bold text-error">-{{ number_format($periodExpenses, 0, '.', ' ') }} ₴</p>
-                </div>
+    {{-- Загальний баланс і статистика --}}
+    <div style="background:#6366f1;border-radius:12px;padding:16px;margin-bottom:16px;color:white">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <div>
+                <p style="font-size:13px;opacity:0.8;margin-bottom:4px">Загальний баланс</p>
+                <p style="font-size:28px;font-weight:bold">{{ number_format($totalBalance, 0, '.', ' ') }} ₴</p>
+            </div>
+            <div>
+                <p style="font-size:13px;opacity:0.8;margin-bottom:4px">Надходження за період</p>
+                <p style="font-size:24px;font-weight:bold;color:#86efac">+{{ number_format($periodIncome, 0, '.', ' ') }} ₴</p>
+            </div>
+            <div>
+                <p style="font-size:13px;opacity:0.8;margin-bottom:4px">Витрати за період</p>
+                <p style="font-size:24px;font-weight:bold;color:#fca5a5">-{{ number_format($periodExpenses, 0, '.', ' ') }} ₴</p>
             </div>
         </div>
     </div>
