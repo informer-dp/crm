@@ -20,6 +20,7 @@
             'notifications' => 'Сповіщення',
             'salary'        => 'Зарплата',
             'inventory'     => 'Склад',
+            'checklist' => 'Чеклист техкарти',
         ] as $tab => $label)
         <button wire:click="$set('activeTab', '{{ $tab }}')"
                 style="padding:8px 16px;font-size:14px;font-weight:500;border:none;cursor:pointer;border-radius:8px 8px 0 0;
@@ -294,6 +295,43 @@
             <div class="mt-4">
                 <button wire:click="saveInventory" class="btn btn-primary">
                     Зберегти налаштування складу
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Чеклист техкарти --}}
+    @if($activeTab === 'checklist')
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base mb-2">Чеклист перевірки після ремонту</h2>
+            <p class="text-sm text-base-content/60 mb-4">
+                Кожен пункт з нового рядка. Використовується в технічній карті при друці квитанції.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-medium">📱 Смартфон / Планшет</span></label>
+                    <textarea wire:model="checklistSmartphone"
+                            class="textarea textarea-bordered h-64 text-sm"
+                            placeholder="Екран&#10;Сенсор&#10;Камера..."></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-medium">💻 Ноутбук / ПК</span></label>
+                    <textarea wire:model="checklistLaptop"
+                            class="textarea textarea-bordered h-64 text-sm"
+                            placeholder="Екран&#10;Клавіатура&#10;Тачпад..."></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-medium">🔧 Універсальний</span></label>
+                    <textarea wire:model="checklistUniversal"
+                            class="textarea textarea-bordered h-64 text-sm"
+                            placeholder="Живлення&#10;Екран..."></textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button wire:click="saveChecklist" class="btn btn-primary">
+                    Зберегти чеклист
                 </button>
             </div>
         </div>

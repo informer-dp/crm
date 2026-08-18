@@ -46,6 +46,11 @@ class SettingsIndex extends Component
     public bool $lowStockNotify = true;
     public bool $autoDeductFromStock = true;
 
+    // --- Чеклист -------------------------------
+    public string $checklistSmartphone = '';
+    public string $checklistLaptop = '';
+    public string $checklistUniversal = '';
+
     public function mount(): void
     {
         // Загальні
@@ -84,6 +89,11 @@ class SettingsIndex extends Component
         // Склад
         $this->lowStockNotify      = (bool)Setting::get('low_stock_notify', true);
         $this->autoDeductFromStock = (bool)Setting::get('auto_deduct_from_stock', true);
+
+        // Чеклист тезнічної карти ремонту
+        $this->checklistSmartphone = Setting::get('checklist_smartphone', "Екран\nСенсор\nКамера (фронт/основна)\nДинамік\nМікрофон\nКнопки гучності\nКнопка живлення\nРоз'єм зарядки\nSIM-слот\nWi-Fi\nBluetooth\nFace ID / Touch ID\nВібромотор\nАкумулятор (% заряду)");
+        $this->checklistLaptop = Setting::get('checklist_laptop', "Екран (засвіти/пікселі)\nКлавіатура\nТачпад\nWi-Fi\nBluetooth\nВебкамера\nМікрофон\nДинаміки\nUSB-порти\nЗарядка\nАкумулятор\nCD/DVD привід\nKensington замок");
+        $this->checklistUniversal = Setting::get('checklist_universal', "Живлення\nЕкран\nКнопки\nПорти/роз'єми\nЗвук\nАкумулятор");
     }
 
     public function saveGeneral(): void
@@ -150,6 +160,14 @@ class SettingsIndex extends Component
 
         session()->flash('success', 'Налаштування складу збережено');
     }
+
+    public function saveChecklist(): void
+{
+    Setting::set('checklist_smartphone', $this->checklistSmartphone);
+    Setting::set('checklist_laptop',     $this->checklistLaptop);
+    Setting::set('checklist_universal',  $this->checklistUniversal);
+    session()->flash('success', 'Чеклист збережено');
+}
 
     public function render()
     {

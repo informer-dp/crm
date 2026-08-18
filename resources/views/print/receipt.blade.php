@@ -5,222 +5,436 @@
     <title>Квитанція {{ $order->number }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 12px; color: #000; }
-        .receipt { width: 80mm; padding: 5mm; }
-        .center { text-align: center; }
+        body { font-family: Arial, sans-serif; font-size: 11px; color: #000; }
+
+        .page { width: 210mm; min-height: 280mm; padding: 8mm; }
+
+        /* ── Квитанція (1/3 аркуша) ── */
+        .receipt-section {
+            height: 95mm;
+            border: 1px solid #000;
+            padding: 4mm;
+            position: relative;
+        }
+
+        /* ── Лінія розрізу ── */
+        .cut-line {
+            border-top: 1px dashed #000;
+            margin: 3mm 0;
+            text-align: center;
+            position: relative;
+        }
+        .cut-line::before {
+            content: '✂ розріжте тут';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 4px;
+            font-size: 9px;
+            color: #666;
+        }
+
+        /* ── Технічна карта (2/3 аркуша) ── */
+        .techcard-section {
+            border: 1px solid #000;
+            padding: 4mm;
+        }
+
+        /* ── Спільні стилі ── */
+        .header { text-align: left; margin-bottom: 2mm; }
+        .company-name { font-size: 13px; font-weight: bold; }
+        .company-info { font-size: 9px; color: #444; }
+        .doc-title { float: none; font-size: 12px; font-weight: bold; text-align: center;
+                     border-top: 1px solid #000; border-bottom: 1px solid #000;
+                     padding: 1mm 0; margin: 2mm 0; }
+
+        .row { display: flex; justify-content: space-between; margin: 1mm 0; }
+        .label { color: #555; min-width: 35mm; font-size: 11px;}
+        .value { font-weight: bold; text-align: right; }
+        .value-left { font-weight: bold; }
+
+        .divider { border-top: 1px solid #ccc; margin: 2mm 0; }
         .bold { font-weight: bold; }
-        .large { font-size: 16px; }
-        .small { font-size: 10px; }
-        .divider { border-top: 1px dashed #000; margin: 4px 0; }
-        .row { display: flex; justify-content: space-between; margin: 2px 0; }
-        .mt { margin-top: 6px; }
-        .mb { margin-bottom: 6px; }
-        table { width: 100%; border-collapse: collapse; margin: 4px 0; }
-        td { padding: 2px 0; vertical-align: top; }
-        td:last-child { text-align: right; white-space: nowrap; }
-        .total-row td { font-weight: bold; font-size: 14px; border-top: 1px solid #000; padding-top: 3px; }
+        .small { font-size: 9px; }
+        .center { text-align: center; }
+
+        /* ── QR-код ── */
+        .qr-block {
+            position: relative;
+            float: right;
+            right: -30mm;
+            /*top: 4mm;*/
+            background-color: white;
+            padding: 5mm;
+            margin-left: -30mm;
+            text-align: center;
+        }
+        .qr-block img { width: 22mm; height: 22mm; }
+        .qr-block .qr-label { font-size: 10px; color: #666; margin-top: 1mm; }
+
+        /* ── Технічна карта ── */
+        .techcard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4mm;
+        }
+
+        .techcard-block { margin-bottom: 3mm; }
+        .techcard-block-title {
+            font-weight: bold;
+            font-size: 10px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1mm;
+            margin-bottom: 2mm;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .field-line {
+            border-bottom: 1px solid #ccc;
+            min-height: 6mm;
+            margin-bottom: 2mm;
+            padding-bottom: 1mm;
+        }
+        .field-label { font-size: 11px; color: #555; margin-bottom: 0.5mm; }
+
+        /* ── Чеклист ── */
+        .checklist { column-count: 2; column-gap: 4mm; }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+            margin-bottom: 1.5mm;
+            break-inside: avoid;
+        }
+        .checkbox {
+            width: 4mm; height: 4mm;
+            border: 1px solid #000;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
+        /* ── Підписи ── */
+        .signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4mm;
+            margin-top: 3mm;
+        }
+        .sign-line {
+            border-bottom: 1px solid #000;
+            height: 6mm;
+            margin-top: 5mm;
+        }
+        .sign-label { font-size: 11px; color: #555; margin-top: 1mm; }
+
+        /* ── Друк ── */
         @media print {
             body { margin: 0; }
-            .no-print { display: none; }
+            .no-print { display: none !important; }
+            @page { margin: 0; size: A4; }
         }
     </style>
 </head>
 <body>
-<div class="receipt">
+<div class="page">
 
-    {{-- Шапка --}}
-    <div class="center mb">
-        <div class="bold large">{{ config('app.name') }}</div>
-        <div class="small">{{ \App\Models\Setting::get('company_address') }}</div>
-        <div class="small">{{ \App\Models\Setting::get('company_phone') }}</div>
-    </div>
+    {{-- ════════════════════════════════════
+         КВИТАНЦІЯ (1/3 аркуша)
+    ════════════════════════════════════ --}}
+    <div class="receipt-section">
 
-    <div class="divider"></div>
+        
 
-    {{-- Тип документу --}}
-    <div class="center bold mt mb">
-        @if($type === 'acceptance')
-            КВИТАНЦІЯ ПРО ПРИЙОМ
-        @elseif($type === 'prepayment')
-            КВИТАНЦІЯ ПРО ПЕРЕДОПЛАТУ
-        @else
-            КВИТАНЦІЯ ПРО ОПЛАТУ
-        @endif
-    </div>
+        {{-- Шапка --}}
+        <div class="header" style="margin-right: 26mm">
+            {{-- QR-код --}}
+        <div class="qr-block">
+            {!! QrCode::size(84)->generate(
+                config('app.url') . '/track?number=' . $order->number . '&code=' . $order->check_code
+            ) !!}
+            <div class="qr-label">Перевірити статус</div>
+        </div>
+            <div class="company-name">{{ \App\Models\Setting::get('company_name') }}</div>
+            <div class="company-info">
+                {{ \App\Models\Setting::get('company_address') }} |
+                {{ \App\Models\Setting::get('company_phone') }}
+            </div>
+        </div>
 
-    <div class="divider"></div>
+        {{-- Заголовок --}}
+        <div class="doc-title"><h2>КВИТАНЦІЯ ПРО ПРИЙОМ ПРИСТРОЮ</h2></div>
 
-    {{-- Дані заявки --}}
-    <div class="mt mb">
+        {{-- Основні дані --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2mm">
+            <div>
+                <div class="row">
+                    <span class="label">№ замовлення:</span>
+                    <span class="value">{{ $order->number }}</span>
+                </div>
+                <div class="row">
+                    <span class="label">Дата прийому:</span>
+                    <span class="value">{{ now()->format('d.m.Y H:i') }}</span>
+                </div>
+                <div class="row">
+                    <span class="label">Код перевірки:</span>
+                    <span class="value">{{ $order->check_code }}</span>
+                </div>
+                @if($order->estimated_date)
+                <div class="row">
+                    <span class="label">Очік. дата:</span>
+                    <span class="value">{{ $order->estimated_date->format('d.m.Y') }}</span>
+                </div>
+                @endif
+            </div>
+            <div>
+                <div class="row">
+                    <span class="label">Клієнт:</span>
+                    <span class="value-left">{{ $order->client->name }}</span>
+                </div>
+                <div class="row">
+                    <span class="label">Телефон:</span>
+                    <span class="value-left">{{ $order->client->phone }}</span>
+                </div>
+                @if($order->prepayment > 0)
+                <div class="row">
+                    <span class="label">Передоплата:</span>
+                    <span class="value">{{ number_format($order->prepayment, 0, '.', ' ') }} ₴</span>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        {{-- Пристрій --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2mm">
+            <div>
+                <div class="row">
+                    <span class="label">Пристрій:</span>
+                    <span class="value-left bold">{{ $order->device->full_name }}</span>
+                </div>
+                @if($order->device->serial_number)
+                <div class="row">
+                    <span class="label">SN:</span>
+                    <span class="value-left">{{ $order->device->serial_number }}</span>
+                </div>
+                @endif
+                @if($order->device->imei)
+                <div class="row">
+                    <span class="label">IMEI:</span>
+                    <span class="value-left">{{ $order->device->imei }}</span>
+                </div>
+                @endif
+            </div>
+            {{-- права колонка пристрою --}}
+            <div>
+                <div class="field-label" style="font-size:9px;color:#555;margin-bottom:1mm">Комплектація:</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5mm">
+                    @foreach(['Зарядний пристрій', 'Кабель', 'Чохол', 'Захисне скло', 'SIM-карта', 'Карта пам\'яті', 'Сумка', 'Інше'] as $item)
+                    <div style="display:flex;align-items:center;gap:1mm;font-size:9px">
+                        <span style="width:3mm;height:3mm;border:1px solid #000;display:inline-block;flex-shrink:0"></span>
+                        {{ $item }}
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        @if($order->malfunction)
+        <div class="divider"></div>
         <div class="row">
-            <span>№ замовлення:</span>
-            <span class="bold">{{ $order->number }}</span>
+            <span class="label">Несправність:</span>
+            <span style="flex:1;padding-left:2mm">{{ $order->malfunction }}</span>
         </div>
-        <div class="row">
-            <span>Дата:</span>
-            <span>{{ now()->format('d.m.Y H:i') }}</span>
-        </div>
-        <div class="row">
-            <span>Код перевірки:</span>
-            <span class="bold">{{ $order->check_code }}</span>
-        </div>
-        @if($order->estimated_date)
-        <div class="row">
-            <span>Очік. дата:</span>
-            <span>{{ $order->estimated_date->format('d.m.Y') }}</span>
-        </div>
-        @endif
-    </div>
-
-    <div class="divider"></div>
-
-    {{-- Клієнт --}}
-    <div class="mt mb">
-        <div class="row">
-            <span>Клієнт:</span>
-            <span class="bold">{{ $order->client->name }}</span>
-        </div>
-        <div class="row">
-            <span>Телефон:</span>
-            <span>{{ $order->client->phone }}</span>
-        </div>
-    </div>
-
-    <div class="divider"></div>
-
-    {{-- Пристрій --}}
-    <div class="mt mb">
-        <div class="row">
-            <span>Пристрій:</span>
-            <span class="bold">{{ $order->device->full_name }}</span>
-        </div>
-        @if($order->device->serial_number)
-        <div class="row">
-            <span>SN:</span>
-            <span>{{ $order->device->serial_number }}</span>
-        </div>
-        @endif
-        @if($order->device->imei)
-        <div class="row">
-            <span>IMEI:</span>
-            <span>{{ $order->device->imei }}</span>
-        </div>
-        @endif
-        @if($order->device->appearance)
-        <div class="mt small">
-            <div>Вигляд: {{ $order->device->appearance }}</div>
-        </div>
-        @endif
-    </div>
-
-    <div class="divider"></div>
-
-    {{-- Несправність --}}
-    <div class="mt mb small">
-        <div class="bold">Несправність:</div>
-        <div>{{ $order->malfunction }}</div>
-    </div>
-
-    @if($type !== 'acceptance' && $order->estimate)
-    <div class="divider"></div>
-
-    {{-- Кошторис --}}
-    <div class="mt mb">
-        @if($order->estimate->works->count())
-        <div class="small bold mb">Роботи:</div>
-        <table>
-            @foreach($order->estimate->works as $work)
-            <tr>
-                <td>{{ $work->name }}</td>
-                <td>{{ number_format($work->total, 0, '.', ' ') }} ₴</td>
-            </tr>
-            @endforeach
-        </table>
-        @endif
-
-        @if($order->estimate->parts->count())
-        <div class="small bold mb mt">Запчастини:</div>
-        <table>
-            @foreach($order->estimate->parts as $part)
-            <tr>
-                <td>{{ $part->name }}{{ $part->is_own_part ? ' (кл.)' : '' }}</td>
-                <td>{{ number_format($part->total, 0, '.', ' ') }} ₴</td>
-            </tr>
-            @endforeach
-        </table>
         @endif
 
-        <table class="mt">
-            @if($order->estimate->discount > 0)
-            <tr>
-                <td>Знижка:</td>
-                <td>-{{ number_format($order->estimate->discount, 0, '.', ' ') }}
-                    {{ $order->estimate->discount_type === 'percent' ? '%' : '₴' }}</td>
-            </tr>
-            @endif
-            @if($order->prepayment > 0)
-            <tr>
-                <td>Передоплата:</td>
-                <td>{{ number_format($order->prepayment, 0, '.', ' ') }} ₴</td>
-            </tr>
-            @endif
-            <tr class="total-row">
-                <td>РАЗОМ:</td>
-                <td>{{ number_format($order->estimate->total, 0, '.', ' ') }} ₴</td>
-            </tr>
-            @if($order->prepayment > 0)
-            <tr>
-                <td>До сплати:</td>
-                <td class="bold">{{ number_format($order->estimate->total - $order->prepayment, 0, '.', ' ') }} ₴</td>
-            </tr>
-            @endif
-        </table>
-    </div>
-    @endif
-
-    @if($type === 'acceptance')
-    <div class="divider"></div>
-    {{-- Передоплата при прийомі --}}
-    @if($order->prepayment > 0)
-    <div class="mt mb">
-        <div class="row bold">
-            <span>Передоплата:</span>
-            <span>{{ number_format($order->prepayment, 0, '.', ' ') }} ₴</span>
-        </div>
-    </div>
-    <div class="divider"></div>
-    @endif
-    @endif
-
-    {{-- Підпис --}}
-    <div class="mt mb small">
-        <div class="row mt">
-            <span>Прийняв:</span>
-            <span>{{ $order->manager?->name ?? auth()->user()->name }}</span>
-        </div>
-        <div class="row mt" style="margin-top: 12px;">
-            <span>Підпис клієнта: ___________</span>
+        {{-- Підпис --}}
+        <div style="display:flex;justify-content:space-between;margin-top:3mm;align-items:flex-end">
+            <div class="small" style="color:#555">
+                {{ \App\Models\Setting::get('receipt_footer_text') }}
+            </div>
+            <div style="text-align:right">
+                <div class="small" style="color:#555">Прийняв: {{ $order->manager?->name ?? auth()->user()->name }}</div>
+                <div style="border-bottom:1px solid #000;width:40mm;margin-top:4mm"></div>
+                <div class="small" style="color:#555;margin-top:1mm">Підпис клієнта</div>
+            </div>
         </div>
     </div>
 
-    <div class="divider"></div>
+    {{-- Лінія розрізу --}}
+    <div class="cut-line"></div>
 
-    {{-- Футер --}}
-    <div class="center small mt">
-        <div>Перевірити статус замовлення:</div>
-        <div>{{ \App\Models\Setting::get('company_website') }}</div>
-        <div class="mt">Код: <span class="bold">{{ $order->check_code }}</span></div>
-        <div class="mt">{{ \App\Models\Setting::get('receipt_footer_text') }}</div>
+    {{-- ════════════════════════════════════
+         ТЕХНІЧНА КАРТА (2/3 аркуша)
+    ════════════════════════════════════ --}}
+    <div class="techcard-section">
+
+        {{-- Заголовок техкарти --}}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3mm">
+            <div>
+                <div class="bold" style="font-size:13px">ТЕХНІЧНА КАРТА</div>
+                <div class="small" style="color:#555">{{ \App\Models\Setting::get('company_name') }}</div>
+            </div>
+            <div style="text-align:right">
+                <div class="bold" style="font-size:14px">{{ $order->number }}</div>
+                <div class="small">{{ now()->format('d.m.Y') }}</div>
+            </div>
+        </div>
+
+        <div class="techcard-grid">
+
+            {{-- ЛІВА КОЛОНКА --}}
+            <div>
+
+                {{-- Клієнт і пристрій --}}
+                <div class="techcard-block">
+                    <div class="techcard-block-title">Клієнт і пристрій</div>
+                    <div class="field-label">Клієнт / Телефон</div>
+                    <div class="field-line" style="font-size:14px">
+                        {{ $order->client->name }} | {{ $order->client->phone }}
+                    </div>
+                    <div class="field-label">Пристрій</div>
+                    <div class="field-line bold" style="font-size:11px">
+                        {{ $order->device->full_name }}
+                        @if($order->device->serial_number) | SN: {{ $order->device->serial_number }} @endif
+                        @if($order->device->imei) | IMEI: {{ $order->device->imei }} @endif
+                    </div>
+                </div>
+
+                {{-- Комплектація --}}
+                <div class="techcard-block">
+                    <div class="techcard-block-title">Комплектація</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1mm;margin-bottom:2mm">
+                        @foreach(['Зарядний пристрій', 'Кабель', 'Чохол', 'Захисне скло', 'SIM-карта', 'Карта пам\'яті', 'Сумка', 'Інше'] as $item)
+                        <div class="checklist-item">
+                            <span class="checkbox"></span>
+                            <span style="font-size:10px">{{ $item }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="field-label">Додатково</div>
+                    <div class="field-line"></div>
+                </div>
+
+                {{-- Несправність --}}
+                <div class="techcard-block">
+                    <div class="techcard-block-title">Несправність (зі слів клієнта)</div>
+                    <div style="min-height:12mm;border:1px solid #ddd;padding:2mm;font-size:10px;border-radius:2mm">
+                        {{ $order->malfunction }}
+                    </div>
+                </div>
+
+                
+
+            </div>
+
+            {{-- ПРАВА КОЛОНКА --}}
+            <div>
+
+                {{-- Чеклист перевірки --}}
+                <div class="techcard-block">
+                    <div class="techcard-block-title">✓ Чеклист перевірки після ремонту</div>
+                    @php
+                        $deviceTypeName = strtolower($order->device->deviceType->name ?? '');
+                        if (str_contains($deviceTypeName, 'смартфон') || str_contains($deviceTypeName, 'планшет')) {
+                            $checklistKey = 'checklist_smartphone';
+                        } elseif (str_contains($deviceTypeName, 'ноутбук') || str_contains($deviceTypeName, 'пк') || str_contains($deviceTypeName, 'моноблок')) {
+                            $checklistKey = 'checklist_laptop';
+                        } else {
+                            $checklistKey = 'checklist_universal';
+                        }
+                        $checklistItems = array_filter(
+                            explode("\n", \App\Models\Setting::get($checklistKey, '')),
+                            fn($item) => trim($item) !== ''
+                        );
+                    @endphp
+                    <div class="checklist">
+                        @foreach($checklistItems as $item)
+                        <div class="checklist-item">
+                            <span class="checkbox"></span>
+                            <span style="font-size:10px">{{ trim($item) }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Нотатки інженера --}}
+                <div class="techcard-block" style="margin-top:3mm">
+                    <div class="techcard-block-title">Нотатки інженера</div>
+                    <div class="field-line" style="min-height:6mm">{{ $order->notes }}</div>
+                    <div class="field-line"></div>
+                </div>
+
+                {{-- Фінансовий підсумок --}}
+                @if($order->estimate)
+                <div class="techcard-block" style="margin-top:3mm">
+                    <div class="techcard-block-title">Фінансовий підсумок</div>
+                    <div class="row">
+                        <span class="label">Роботи:</span>
+                        <span class="value">{{ number_format($order->estimate->works_total, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">Запчастини:</span>
+                        <span class="value">{{ number_format($order->estimate->parts_total, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @if($order->estimate->discount > 0)
+                    <div class="row">
+                        <span class="label">Знижка:</span>
+                        <span class="value">-{{ number_format($order->estimate->discount, 0, '.', ' ') }}
+                            {{ $order->estimate->discount_type === 'percent' ? '%' : '₴' }}</span>
+                    </div>
+                    @endif
+                    @if($order->prepayment > 0)
+                    <div class="row">
+                        <span class="label">Передоплата:</span>
+                        <span class="value">{{ number_format($order->prepayment, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @endif
+                    <div class="divider"></div>
+                    <div class="row bold">
+                        <span>РАЗОМ:</span>
+                        <span>{{ number_format($order->estimate->total, 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @if($order->prepayment > 0)
+                    <div class="row bold" style="color:#c00">
+                        <span>ДО СПЛАТИ:</span>
+                        <span>{{ number_format(max(0, $order->estimate->total - $order->prepayment), 0, '.', ' ') }} ₴</span>
+                    </div>
+                    @endif
+                </div>
+                @endif
+
+            </div>
+        </div>
+
+        {{-- Підписи --}}
+        <div class="signatures" style="margin-top:4mm;border-top:1px solid #000;padding-top:3mm">
+            <div>
+                <div class="small" style="color:#555">Інженер</div>
+                <div class="sign-line"></div>
+                <div class="sign-label">ПІБ та підпис</div>
+            </div>
+            <div>
+                <div class="small" style="color:#555">Клієнт отримав пристрій. Претензій не маю.</div>
+                <div class="sign-line"></div>
+                <div class="sign-label">Підпис клієнта при видачі</div>
+            </div>
+        </div>
+
     </div>
-
 </div>
 
-{{-- Кнопка друку --}}
-<div class="no-print" style="padding: 10px; text-align: center;">
-    <button onclick="window.print()" style="padding: 8px 20px; font-size: 14px; cursor: pointer;">
+{{-- Кнопки --}}
+<div class="no-print" style="padding:16px;text-align:center;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #eee;box-shadow:0 -2px 8px rgba(0,0,0,0.1)">
+    <button onclick="window.print()"
+            style="padding:10px 24px;background:#6366f1;color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer;margin-right:8px">
         🖨 Друкувати
     </button>
-    <button onclick="window.close()" style="padding: 8px 20px; font-size: 14px; cursor: pointer; margin-left: 10px;">
+    <button onclick="window.close()"
+            style="padding:10px 24px;background:#f3f4f6;border:none;border-radius:8px;font-size:15px;cursor:pointer">
         ✕ Закрити
     </button>
 </div>

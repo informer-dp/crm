@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.10",
         "laravel/ui": "^4.6",
         "livewire/livewire": "^3.0",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.25"
     },
     "require-dev": {
