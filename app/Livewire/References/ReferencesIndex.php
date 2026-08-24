@@ -48,6 +48,14 @@ class ReferencesIndex extends Component
     public string $supplierNotes = '';
     public string $supplierContactPerson = '';
 
+    // ── Статті руху коштів ────────────────────
+    public bool $showBasisForm = false;
+    public ?int $editingBasisId = null;
+    public string $basisName = '';
+    public string $basisGroup = '';
+    public string $basisFlowType = 'both';
+    public bool $basisIsActive = true;
+
     // ── Типи пристроїв — методи ───────────────
 
     public function openDeviceTypeForm(?int $id = null): void
@@ -210,6 +218,48 @@ class ReferencesIndex extends Component
         $this->showExpenseCatForm = false;
     }
 
+    public function openBasisForm(?int $id = null): void
+{
+    $this->editingBasisId = $id;
+    if ($id) {
+        $basis = \App\Models\TransactionBasis::findOrFail($id);
+        $this->basisName     = $basis->name;
+        $this->basisGroup    = $basis->group ?? '';
+        $this->basisFlowType = $basis->flow_type;
+        $this->basisIsActive = $basis->is_active;
+    } else {
+        $this->basisName     = '';
+        $this->basisGroup    = '';
+        $this->basisFlowType = 'both';
+        $this->basisIsActive = true;
+    }
+    $this->showBasisForm = true;
+}
+
+    public function saveBasis(): void
+    {
+        $this->validate([
+            'basisName'     => 'required|min:2',
+            'basisFlowType' => 'required|in:income,expense,both,internal',
+        ], [
+            'basisName.required' => 'Введіть назву',
+        ]);
+
+        $data = [
+            'name'      => $this->basisName,
+            'group'     => $this->basisGroup ?: null,
+            'flow_type' => $this->basisFlowType,
+            'is_active' => $this->basisIsActive,
+        ];
+
+        if ($this->editingBasisId) {
+            \App\Models\TransactionBasis::findOrFail($this->editingBasisId)->update($data);
+        } else {
+            \App\Models\TransactionBasis::create($data);
+        }
+        $this->showBasisForm = false;
+    }
+
     // ── Постачальники — методи ────────────────
 
     public function openSupplierForm(?int $id = null): void
@@ -288,11 +338,17 @@ class ReferencesIndex extends Component
 
         $suppliers = Supplier::orderBy('type')->orderBy('name')->get();
 
+        $bases = \App\Models\TransactionBasis::orderBy('flow_type')
+            ->orderBy('sort_order')
+            ->orderBy('group')
+            ->get()
+            ->groupBy('flow_type');
+
         return view('livewire.references.references-index', compact(
             'deviceTypes', 'brands',
             'partCategories', 'expenseCategories',
             'partCatParents', 'expenseCatParents',
-            'suppliers'
+            'suppliers', 'bases'
         ))->extends('layouts.app')->section('content');
     }
 }

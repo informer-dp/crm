@@ -909,6 +909,17 @@
                     </div>
 
                     <div>
+                        <label style="font-size:13px;display:block;margin-bottom:4px">Контрагент</label>
+                        <select wire:model="expenseSupplierId"
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                            <option value="">— Не вказано —</option>
+                            @foreach(\App\Models\Supplier::active()->orderBy('name')->get() as $supplier)
+                                <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
                         <label style="font-size:13px;display:block;margin-bottom:4px">Рахунок</label>
                         <select wire:model="expenseAccountId"
                                 style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">

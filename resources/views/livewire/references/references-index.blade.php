@@ -10,6 +10,7 @@
             'brands' => 'Бренди',
             'part_categories' => 'Категорії запчастин',
             'expense_categories' => 'Категорії витрат',
+            'transaction_bases' => 'Статті руху коштів',
             'suppliers' => 'Постачальники',
         ] as $tab => $label)
         <button wire:click="$set('activeTab', '{{ $tab }}')"
@@ -167,6 +168,47 @@
         </div>
     </div>
     @endif
+
+    {{-- Статті руху коштів --}}
+    @if($activeTab === 'transaction_bases')
+        <div class="card bg-base-100 shadow-sm">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-bold">Статті руху коштів</h2>
+                    <button wire:click="openBasisForm()" class="btn btn-primary btn-sm">+ Додати</button>
+                </div>
+
+                @foreach(['income' => 'Надходження', 'expense' => 'Витрати', 'both' => 'Обидва напрями', 'internal' => 'Внутрішні'] as $flowType => $flowLabel)
+                @if(isset($bases[$flowType]) && $bases[$flowType]->count())
+                <div style="margin-bottom:20px">
+                    <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#666;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e5e7eb">
+                        {{ $flowLabel }}
+                    </div>
+                    @php $grouped = $bases[$flowType]->groupBy('group'); @endphp
+                    @foreach($grouped as $group => $items)
+                    <div style="margin-bottom:12px">
+                        @if($group)
+                        <div style="font-size:12px;color:#888;margin-bottom:4px;padding-left:4px">{{ $group }}</div>
+                        @endif
+                        @foreach($items as $basis)
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;{{ !$basis->is_active ? 'opacity:0.4' : '' }}"
+                            onmouseover="this.style.background='#f9fafb'"
+                            onmouseout="this.style.background='transparent'">
+                            <span style="font-size:13px">{{ $basis->name }}</span>
+                            <button wire:click="openBasisForm({{ $basis->id }})"
+                                    style="padding:3px 8px;background:#f3f4f6;border:none;border-radius:6px;cursor:pointer;font-size:12px">
+                                Редагувати
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+                @endforeach
+            </div>
+        </div>
+        @endif
 
     {{-- Постачальники --}}
     @if($activeTab === 'suppliers')
@@ -382,6 +424,55 @@
                     Зберегти
                 </button>
                 <button wire:click="$set('showExpenseCatForm', false)"
+                        style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer">
+                    Скасувати
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+        {{-- Модал редагування статті витрат --}}
+        @if($showBasisForm)
+    <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
+        <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:440px;margin:16px">
+            <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px">
+                {{ $editingBasisId ? 'Редагувати статтю' : 'Нова стаття руху коштів' }}
+            </h3>
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <div>
+                    <label style="font-size:13px;display:block;margin-bottom:4px">Назва *</label>
+                    <input wire:model="basisName" type="text"
+                        style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
+                    @error('basisName')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+                </div>
+                <div>
+                    <label style="font-size:13px;display:block;margin-bottom:4px">Група</label>
+                    <input wire:model="basisGroup" type="text"
+                        style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"
+                        placeholder="Надходження від клієнтів, Витрати..."/>
+                </div>
+                <div>
+                    <label style="font-size:13px;display:block;margin-bottom:4px">Тип</label>
+                    <select wire:model="basisFlowType"
+                            style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                        <option value="income">Надходження</option>
+                        <option value="expense">Витрата</option>
+                        <option value="both">Обидва напрями</option>
+                        <option value="internal">Внутрішній переказ</option>
+                    </select>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                    <input wire:model="basisIsActive" type="checkbox" style="width:16px;height:16px"/>
+                    <span style="font-size:14px">Активна</span>
+                </label>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px">
+                <button wire:click="saveBasis"
+                        style="flex:1;padding:10px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500">
+                    Зберегти
+                </button>
+                <button wire:click="$set('showBasisForm', false)"
                         style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer">
                     Скасувати
                 </button>

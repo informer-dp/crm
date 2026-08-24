@@ -72,6 +72,7 @@ class OrderShow extends Component
     public ?int $expenseAccountId = null;
     public string $expenseDate = '';
     public bool $expenseIsPaid = true;
+    public ?int $expenseSupplierId = null;
 
     public function saveExpense(): void
 {
@@ -89,6 +90,7 @@ class OrderShow extends Component
     $expense = \App\Models\Expense::create([
         'category_id'  => $this->expenseCategoryId,
         'order_id'     => $this->order->id,
+        'supplier_id' => $this->expenseSupplierId ?: null,
         'account_id'   => $this->expenseIsPaid ? $this->expenseAccountId : null,
         'description'  => $this->expenseDescription,
         'amount'       => (float)$this->expenseAmount,
@@ -101,6 +103,8 @@ class OrderShow extends Component
         $account = \App\Models\Account::findOrFail($this->expenseAccountId);
         $amount  = (float)$this->expenseAmount;
 
+        $basisId = \App\Models\TransactionBasis::where('name', 'Закупівля запчастини під заявку')->value('id');
+
         $transaction = \App\Models\Transaction::create([
             'account_id'       => $account->id,
             'type'             => 'expense',
@@ -109,6 +113,10 @@ class OrderShow extends Component
             'reference_type'   => 'App\Models\Expense',
             'reference_id'     => $expense->id,
             'user_id'          => auth()->id(),
+            'basis_id'         => $basisId,         // додай
+            'order_id'         => $this->order->id, // додай
+            'supplier_id'      => $this->expenseSupplierId ?: null, // додай
+            'payment_method'   => 'cash',
             'description'      => $this->expenseDescription . ' (Заявка ' . $this->order->number . ')',
             'transaction_date' => $this->expenseDate,
         ]);
@@ -122,6 +130,7 @@ class OrderShow extends Component
     $this->expenseCategoryId = null;
     $this->expenseDate = now()->format('Y-m-d');
     $this->showExpenseForm = false;
+    $this->expenseSupplierId = null;
 }
 
     // ── Зміна статусу ─────────────────────────
@@ -349,6 +358,9 @@ public function updateDiscount(string $discount, string $type): void
         $amount  = (float)$this->paymentAmount;
         $isRefund = $this->paymentType === 'refund';
 
+        // Знаходимо basis_id для оплати ремонту
+        $basisId = \App\Models\TransactionBasis::where('name', 'Оплата ремонту')->value('id');
+
         $transaction = \App\Models\Transaction::create([
             'account_id'       => $account->id,
             'type'             => $isRefund ? 'expense' : 'income',
@@ -357,6 +369,10 @@ public function updateDiscount(string $discount, string $type): void
             'reference_type'   => 'App\Models\Order',
             'reference_id'     => $this->order->id,
             'user_id'          => auth()->id(),
+            'basis_id'         => $basisId,
+            'order_id'         => $this->order->id,
+            'client_id'        => $this->order->client_id,
+            'payment_method'   => $this->paymentMethod,
             'description'      => 'Оплата по заявці ' . $this->order->number,
             'transaction_date' => now()->toDateString(),
         ]);
