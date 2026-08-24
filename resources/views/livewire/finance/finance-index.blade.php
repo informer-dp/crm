@@ -475,10 +475,12 @@
                     <select wire:model="editBasisId"
                             style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
                         <option value="">— Не вказано —</option>
-                        @foreach($incomeBases->merge($expenseBases) as $group => $items)
+                        @foreach($allBases as $group => $items)
                             <optgroup label="{{ $group }}">
                                 @foreach($items as $basis)
-                                    <option value="{{ $basis->id }}">{{ $basis->name }}</option>
+                                    <option value="{{ $basis->id }}" {{ $editBasisId == $basis->id ? 'selected' : '' }}>
+                                        {{ $basis->name }}
+                                    </option>
                                 @endforeach
                             </optgroup>
                         @endforeach

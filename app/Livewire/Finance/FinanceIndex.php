@@ -307,6 +307,10 @@ class FinanceIndex extends Component
         $transferBases = TransactionBasis::active()->forInternal()->orderBy('sort_order')->get();
 
         $suppliers = Supplier::active()->orderBy('name')->get();
+        $allBases = TransactionBasis::active()
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('group');
 
         $viewingTransaction = $this->viewingTransactionId
             ? Transaction::with(['account', 'user', 'basis', 'order.client', 'client', 'supplier'])->find($this->viewingTransactionId)
@@ -317,7 +321,7 @@ class FinanceIndex extends Component
             'income', 'expense', 'transfer',
             'periodIncome', 'periodExpense',
             'incomeBases', 'expenseBases', 'transferBases',
-            'suppliers', 'viewingTransaction'
-        ))->extends('layouts.app')->section('content');
+            'allBases', 'suppliers', 'viewingTransaction'
+            ))->extends('layouts.app')->section('content');
     }
 }
