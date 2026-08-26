@@ -393,4 +393,21 @@ public function updateDiscount(string $discount, string $type): void
         $this->showPaymentForm = false;
         $this->paymentAmount = '';
     }
+
+    public function duplicate(): void
+    {
+        $new = Order::create([
+            'client_id'     => $this->order->client_id,
+            'device_id'     => $this->order->device_id,
+            'manager_id'    => auth()->id(),
+            'type'          => $this->order->type,
+            'priority'      => 'normal',
+            'malfunction'   => '',
+            'notes'         => null,
+            'estimated_date'=> null,
+            'prepayment'    => 0,
+        ]);
+
+        $this->redirect(route('orders.edit', $new), navigate: false);
+    }
 }

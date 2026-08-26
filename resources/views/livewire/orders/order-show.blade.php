@@ -65,7 +65,7 @@
     Гарантія
 </a>
 @endif
-</div>
+    </div>
         <div class="flex gap-2">
             @if(!$order->isLocked())
                 <a href="{{ route('orders.edit', $order) }}" class="btn btn-outline btn-sm">
@@ -74,6 +74,17 @@
             @endif
         </div>
     </div>
+
+    @if($order->status === 'issued' || $order->status === 'cancelled')
+    <button wire:click="duplicate"
+            wire:confirm="Створити нову заявку на основі цієї?"
+            class="btn btn-outline btn-sm gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        Нова заявка на основі
+    </button>
+    @endif
 
    {{-- Кнопки зміни статусу --}}
     @if(!$order->isLocked())
@@ -153,7 +164,7 @@
             {{-- Пристрій --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">Пристрій</h2>
+                    <h2 class="card-title text-base font-bold text-primary">Пристрій</h2>
                     <div class="grid grid-cols-2 gap-3 text-sm">
                         <div>
                             <p class="text-base-content/60">Тип</p>
@@ -188,7 +199,7 @@
             {{-- Несправність і діагноз --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">Несправність</h2>
+                    <h2 class="card-title text-base font-bold text-primary">Несправність</h2>
                     <div class="flex flex-col gap-3 text-sm">
                         <div>
                             <p class="text-base-content/60 mb-1">Скарга клієнта</p>
@@ -208,7 +219,7 @@
 <div class="card bg-base-100 shadow-sm">
     <div class="card-body">
         <div class="flex items-center justify-between mb-2">
-            <h2 class="card-title text-base">Кошторис</h2>
+            <h2 class="card-title text-base font-bold text-primary">Кошторис</h2>
             @if(!$order->isLocked())
                 <button wire:click="initEstimate" class="btn btn-ghost btn-xs gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -440,7 +451,7 @@
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <div class="flex items-center justify-between mb-2">
-                        <h2 class="card-title text-base">Витрати по заявці</h2>
+                        <h2 class="card-title text-base font-bold text-primary">Витрати по заявці</h2>
                         <span class="text-sm text-base-content/60">
                             {{ $orderExpenses->count() }} позицій
                         </span>
@@ -495,7 +506,7 @@
             {{-- Коментарі --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">Коментарі</h2>
+                    <h2 class="card-title text-base font-bold text-primary">Коментарі</h2>
                     @forelse($order->comments as $comment)
                     <div class="flex gap-3 text-sm {{ $comment->is_internal ? 'opacity-70' : '' }}">
                         <div class="avatar placeholder flex-shrink-0">
@@ -546,11 +557,14 @@
             {{-- Клієнт --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">Клієнт</h2>
+                    <h2 class="card-title text-base font-bold text-primary">Клієнт</h2>
                     <div class="flex flex-col gap-2 text-sm">
-                        <div>
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999999">
+                                <path d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"/>
+                            </svg>
                             <a href="{{ route('clients.show', $order->client) }}"
-                               class="font-medium link link-hover">
+                               class="font-bold link link-hover ">
                                 {{ $order->client->name }}
                             </a>
                             @if($order->client->is_vip)
@@ -581,7 +595,7 @@
             {{-- Деталі заявки --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">Деталі</h2>
+                    <h2 class="card-title text-base font-bold text-primary">Деталі</h2>
                     <div class="flex flex-col gap-2 text-sm">
                         @if($order->manager)
                         <div class="flex justify-between">
@@ -619,10 +633,10 @@
 
            {{-- Оплата --}}
         <div class="card bg-base-100 shadow-sm">
-            <div class="card-body p-4">
+            <div class="card-body ">
                 
                 <div class="flex items-center justify-between">
-                    <h2 class="font-bold">Оплата</h2>
+                    <h2 class="text-base font-bold text-primary ">Оплата</h2>
                     <div class="flex gap-1">
                         <button wire:click="$set('showExpenseForm', true)"
                                 class="btn btn-error btn-sm gap-1">
@@ -721,7 +735,7 @@
             {{-- Історія статусів --}}
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-base">Історія</h2>
+                    <h2 class="card-title text-base font-bold text-primary">Історія</h2>
                     <ol class="relative border-l border-base-300 ml-2">
                         @foreach($order->statusHistory as $history)
                         <li class="mb-4 ml-4">
