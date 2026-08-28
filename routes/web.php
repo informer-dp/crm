@@ -38,6 +38,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/create', OrderCreate::class)->name('orders.create');
     Route::get('/orders/{order}', OrderShow::class)->name('orders.show');
     Route::get('/orders/{order}/edit', OrderEdit::class)->name('orders.edit');
+    
+    //Робочий план
+    Route::get('/planning', App\Livewire\Planning\PlanningIndex::class)
+    ->name('planning.index');
 
     // Клієнти
     Route::get('/clients', ClientIndex::class)->name('clients.index');
