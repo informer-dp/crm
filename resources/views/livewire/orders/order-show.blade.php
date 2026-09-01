@@ -964,4 +964,19 @@
             </div>
         </div>
         @endif
+
+        {{-- Модал помилки --}}
+        @if($showErrorModal)
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
+            <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:16px;text-align:center">
+                <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+                <h3 style="font-size:18px;font-weight:bold;margin-bottom:8px;color:#dc2626">Неможливо змінити статус</h3>
+                <p style="font-size:14px;color:#666;margin-bottom:20px">{{ $errorMessage }}</p>
+                <button wire:click="$set('showErrorModal', false)"
+                        style="padding:10px 24px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500">
+                    Зрозуміло
+                </button>
+            </div>
+        </div>
+        @endif
 </div>

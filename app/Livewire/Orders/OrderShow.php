@@ -134,9 +134,17 @@ class OrderShow extends Component
 }
 
     // ── Зміна статусу ─────────────────────────
+    public string $errorMessage = '';
+    public bool $showErrorModal = false;
 
     public function openStatusModal(string $status): void
     {
+        // Перевіряємо інженера ДО відкриття модалу
+        if ($status !== 'cancelled' && $this->order->engineers->isEmpty()) {
+            $this->errorMessage = 'Спочатку призначте інженера для цієї заявки';
+            $this->showErrorModal = true;
+            return;
+        }
         $this->newStatus = $status;
         $this->statusComment = '';
         $this->showStatusModal = true;
@@ -144,6 +152,7 @@ class OrderShow extends Component
 
     public function changeStatus(): void
     {
+        
         if (!$this->order->canTransitionTo($this->newStatus)) {
             $this->addError('status', 'Неможливо змінити статус');
             return;
