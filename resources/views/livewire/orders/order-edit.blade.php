@@ -160,6 +160,31 @@
                             <label class="label"><span class="label-text">Зовнішній вигляд</span></label>
                             <input wire:model="appearance" type="text" class="input input-bordered input-sm"/>
                         </div>
+                        {{-- Комплектація --}}
+                        <div class="form-control sm:col-span-2">
+                            <label class="label"><span class="label-text">Комплектація (що здав клієнт)</span></label>
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                                @foreach([
+                                    'charger'     => 'Зарядний пристрій',
+                                    'cable'       => 'Кабель',
+                                    'case'        => 'Чохол',
+                                    'glass'       => 'Захисне скло',
+                                    'sim'         => 'SIM-карта',
+                                    'memory_card' => 'Карта пам\'яті',
+                                    'bag'         => 'Сумка',
+                                    'other'       => 'Інше',
+                                ] as $key => $label)
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 8px;border:1px solid #e5e7eb;border-radius:8px;
+                                            {{ in_array($key, $equipment) ? 'background:#eff6ff;border-color:#6366f1' : '' }}">
+                                    <input type="checkbox"
+                                        wire:model="equipment"
+                                        value="{{ $key }}"
+                                        style="width:14px;height:14px"/>
+                                    <span style="font-size:13px">{{ $label }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

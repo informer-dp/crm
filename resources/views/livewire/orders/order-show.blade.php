@@ -192,6 +192,31 @@
                             <p>{{ $order->device->appearance }}</p>
                         </div>
                         @endif
+                        {{-- Комплектація --}}
+                        @if($order->device->equipment && count($order->device->equipment) > 0)
+                        @php
+                            $equipmentLabels = [
+                                'charger'     => 'Зарядний пристрій',
+                                'cable'       => 'Кабель',
+                                'case'        => 'Чохол',
+                                'glass'       => 'Захисне скло',
+                                'sim'         => 'SIM-карта',
+                                'memory_card' => 'Карта пам\'яті',
+                                'bag'         => 'Сумка',
+                                'other'       => 'Інше',
+                            ];
+                        @endphp
+                        <div class="col-span-2">
+                            <p class="text-base-content/60">Комплектація</p>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+                                @foreach($order->device->equipment as $item)
+                                <span style="padding:3px 10px;background:#eff6ff;border:1px solid #c7d2fe;border-radius:9999px;font-size:12px;color:#4338ca">
+                                    ✓ {{ $equipmentLabels[$item] ?? $item }}
+                                </span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -354,92 +379,123 @@
             </div>
 
             {{-- Форма додавання рядків --}}
-            @if($showEstimateForm && !$order->isLocked())
-            <div class="divider my-2"></div>
+            {{-- Модал додавання роботи --}}
+        @if($showEstimateForm && !$order->isLocked())
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
+            <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;margin:16px">
+                <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px">Додати роботу або запчастину</h3>
 
-            {{-- Додати роботу --}}
-            <div class="bg-base-200 rounded-xl p-3 mb-3">
-                <p class="text-xs font-medium mb-2 uppercase tracking-wide">Додати роботу</p>
-                <div class="grid grid-cols-1 gap-2">
-                    <input wire:model="workName" type="text"
-                           class="input input-bordered input-sm w-full"
-                           placeholder="Назва роботи *"/>
-                    @error('workName')<span class="text-error text-xs">{{ $message }}</span>@enderror
+                {{-- Перемикач --}}
+                <div style="display:flex;gap:4px;background:#f3f4f6;padding:4px;border-radius:8px;margin-bottom:16px">
+                    <button wire:click="$set('estimateTab', 'work')"
+                            style="flex:1;padding:6px;border:none;border-radius:6px;cursor:pointer;font-size:13px;
+                                {{ ($estimateTab ?? 'work') === 'work' ? 'background:white;box-shadow:0 1px 2px rgba(0,0,0,0.1);font-weight:500' : 'background:transparent;color:#666' }}">
+                        🔧 Робота
+                    </button>
+                    <button wire:click="$set('estimateTab', 'part')"
+                            style="flex:1;padding:6px;border:none;border-radius:6px;cursor:pointer;font-size:13px;
+                                {{ ($estimateTab ?? 'work') === 'part' ? 'background:white;box-shadow:0 1px 2px rgba(0,0,0,0.1);font-weight:500' : 'background:transparent;color:#666' }}">
+                        🔩 Запчастина
+                    </button>
+                </div>
 
-                    <div class="grid grid-cols-3 gap-2">
+                @if(($estimateTab ?? 'work') === 'work')
+                {{-- Форма роботи --}}
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div>
+                        <label style="font-size:13px;display:block;margin-bottom:4px">Назва роботи *</label>
+                        <input wire:model="workName" type="text"
+                            style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"
+                            placeholder="Заміна дисплею, діагностика..."/>
+                        @error('workName')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
                         <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">Ціна *</label>
                             <input wire:model="workPrice" type="number" min="0"
-                                   class="input input-bordered input-sm w-full"
-                                   placeholder="Ціна *"/>
-                            @error('workPrice')<span class="text-error text-xs">{{ $message }}</span>@enderror
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
+                            @error('workPrice')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
                         </div>
                         <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">К-сть</label>
                             <input wire:model="workQuantity" type="number" min="1"
-                                   class="input input-bordered input-sm w-full"
-                                   placeholder="К-сть"/>
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
                         </div>
                         <div>
-                            <select wire:model="workEngineerId" class="select select-bordered select-sm w-full">
-                                <option value="">Інженер</option>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">Інженер</label>
+                            <select wire:model="workEngineerId"
+                                    style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px">
+                                <option value="">—</option>
                                 @foreach($engineers as $eng)
                                     <option value="{{ $eng->id }}">{{ $eng->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input wire:model="workIsWarranty" type="checkbox" class="checkbox checkbox-sm"/>
-                            <span class="text-xs">Гарантійна робота</span>
-                        </label>
-                        <button wire:click="addWork" class="btn btn-primary btn-sm">
-                            Додати роботу
-                        </button>
-                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                        <input wire:model="workIsWarranty" type="checkbox" style="width:16px;height:16px"/>
+                        <span style="font-size:14px">Гарантійна робота (безкоштовно)</span>
+                    </label>
                 </div>
-            </div>
+                <div style="display:flex;gap:8px;margin-top:16px">
+                    <button wire:click="addWork"
+                            style="flex:1;padding:10px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500">
+                        Додати роботу
+                    </button>
+                    <button wire:click="$set('showEstimateForm', false)"
+                            style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer">
+                        Закрити
+                    </button>
+                </div>
 
-            {{-- Додати запчастину --}}
-            <div class="bg-base-200 rounded-xl p-3">
-                <p class="text-xs font-medium mb-2 uppercase tracking-wide">Додати запчастину</p>
-                <div class="grid grid-cols-1 gap-2">
-                    <input wire:model="partName" type="text"
-                           class="input input-bordered input-sm w-full"
-                           placeholder="Назва запчастини *"/>
-                    @error('partName')<span class="text-error text-xs">{{ $message }}</span>@enderror
-
-                    <div class="grid grid-cols-3 gap-2">
+                @else
+                {{-- Форма запчастини --}}
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div>
+                        <label style="font-size:13px;display:block;margin-bottom:4px">Назва запчастини *</label>
+                        <input wire:model="partName" type="text"
+                            style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"
+                            placeholder="Акумулятор, дисплей..."/>
+                        @error('partName')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
                         <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">Ціна клієнта *</label>
                             <input wire:model="partPrice" type="number" min="0"
-                                   class="input input-bordered input-sm w-full"
-                                   placeholder="Ціна клієнта *"/>
-                            @error('partPrice')<span class="text-error text-xs">{{ $message }}</span>@enderror
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
+                            @error('partPrice')<span style="color:red;font-size:12px">{{ $message }}</span>@enderror
                         </div>
                         <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">Собівартість</label>
                             <input wire:model="partCost" type="number" min="0"
-                                   class="input input-bordered input-sm w-full"
-                                   placeholder="Собівартість"/>
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
                         </div>
                         <div>
+                            <label style="font-size:13px;display:block;margin-bottom:4px">К-сть</label>
                             <input wire:model="partQuantity" type="number" min="1"
-                                   class="input input-bordered input-sm w-full"
-                                   placeholder="К-сть"/>
+                                style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px"/>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input wire:model="partIsOwn" type="checkbox" class="checkbox checkbox-sm"/>
-                            <span class="text-xs">Запчастина клієнта</span>
-                        </label>
-                        <button wire:click="addPart" class="btn btn-primary btn-sm">
-                            Додати запчастину
-                        </button>
-                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                        <input wire:model="partIsOwn" type="checkbox" style="width:16px;height:16px"/>
+                        <span style="font-size:14px">Запчастина клієнта</span>
+                    </label>
                 </div>
+                <div style="display:flex;gap:8px;margin-top:16px">
+                    <button wire:click="addPart"
+                            style="flex:1;padding:10px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500">
+                        Додати запчастину
+                    </button>
+                    <button wire:click="$set('showEstimateForm', false)"
+                            style="padding:10px 16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer">
+                        Закрити
+                    </button>
+                </div>
+                @endif
+
             </div>
-            @endif
+        </div>
+        @endif
 
         @else
             <p class="text-base-content/40 text-sm">Кошторис ще не створено</p>
@@ -464,7 +520,8 @@
                                 <tr>
                                     <th>Дата</th>
                                     <th>Опис</th>
-                                    <th>Категорія</th>
+                                    <th>Стаття</th>
+                                    <th>Контрагент</th>
                                     <th>Статус</th>
                                     <th class="text-right">Сума</th>
                                 </tr>
@@ -472,15 +529,12 @@
                             <tbody>
                                 @foreach($orderExpenses as $expense)
                                 <tr>
-                                    <td class="text-xs">{{ \Carbon\Carbon::parse($expense->expense_date)->format('d.m.Y') }}</td>
+                                    <td class="text-xs">{{ \Carbon\Carbon::parse($expense->transaction_date)->format('d.m.Y') }}</td>
                                     <td class="text-sm">{{ $expense->description }}</td>
-                                    <td class="text-xs text-base-content/60">{{ $expense->category->name }}</td>
+                                    <td class="text-xs text-base-content/60">{{ $expense->basis?->name ?? '—' }}</td>
+                                    <td class="text-xs text-base-content/60">{{ $expense->supplier?->name ?? '—' }}</td>
                                     <td>
-                                        @if($expense->is_paid)
-                                            <span class="badge badge-success badge-xs">Оплачено</span>
-                                        @else
-                                            <span class="badge badge-warning badge-xs">Не оплачено</span>
-                                        @endif
+                                        <span class="badge badge-success badge-xs">Оплачено</span>
                                     </td>
                                     <td class="text-right font-medium text-error text-sm">
                                         -{{ number_format($expense->amount, 0, '.', ' ') }} ₴

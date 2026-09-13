@@ -22,6 +22,7 @@ class OrderShow extends Component
 
     // ── Кошторис ──────────────────────────────
     public bool $showEstimateForm = false;
+    public string $estimateTab = 'work';
 
     // Нова робота
     public string $workName = '';
@@ -252,7 +253,7 @@ public function addWork(): void
     $this->workPrice = '';
     $this->workQuantity = '1';
     $this->workIsWarranty = false;
-    $this->workEngineerId = null;
+    // $this->showEstimateForm = false; // не закриваємо
 }
 
 public function removeWork(int $id): void
@@ -290,6 +291,7 @@ public function addPart(): void
     $this->partCost = '';
     $this->partQuantity = '1';
     $this->partIsOwn = false;
+    // $this->showEstimateForm = false; // не закриваємо
 }
 
 public function removePart(int $id): void
@@ -348,9 +350,10 @@ public function updateDiscount(string $discount, string $type): void
     }
     public function getOrderExpenses()
     {
-        return \App\Models\Expense::where('order_id', $this->order->id)
-            ->with('category')
-            ->orderByDesc('expense_date')
+        return \App\Models\Transaction::where('order_id', $this->order->id)
+            ->where('type', 'expense')
+            ->with(['basis', 'supplier', 'user'])
+            ->orderByDesc('transaction_date')
             ->get();
     }
     public function savePayment(): void

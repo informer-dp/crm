@@ -232,11 +232,27 @@
             {{-- права колонка пристрою --}}
             <div>
                 <div class="field-label" style="font-size:9px;color:#555;margin-bottom:1mm">Комплектація:</div>
+                {{-- Комплектація в квитанції --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5mm">
-                    @foreach(['Зарядний пристрій', 'Кабель', 'Чохол', 'Захисне скло', 'SIM-карта', 'Карта пам\'яті', 'Сумка', 'Інше'] as $item)
+                    @foreach([
+                        'charger'     => 'Зарядний пристрій',
+                        'cable'       => 'Кабель',
+                        'case'        => 'Чохол',
+                        'glass'       => 'Захисне скло',
+                        'sim'         => 'SIM-карта',
+                        'memory_card' => 'Карта пам\'яті',
+                        'bag'         => 'Сумка',
+                        'other'       => 'Інше',
+                    ] as $key => $label)
                     <div style="display:flex;align-items:center;gap:1mm;font-size:9px">
-                        <span style="width:3mm;height:3mm;border:1px solid #000;display:inline-block;flex-shrink:0"></span>
-                        {{ $item }}
+                        @if(in_array($key, $order->device->equipment ?? []))
+                            <span style="width:3mm;height:3mm;border:1px solid #000;display:inline-block;flex-shrink:0;background:#000;position:relative">
+                                <span style="position:absolute;top:-1px;left:0;color:white;font-size:8px;font-weight:bold">✓</span>
+                            </span>
+                        @else
+                            <span style="width:3mm;height:3mm;border:1px solid #000;display:inline-block;flex-shrink:0"></span>
+                        @endif
+                        {{ $label }}
                     </div>
                     @endforeach
                 </div>
@@ -307,11 +323,27 @@
                 {{-- Комплектація --}}
                 <div class="techcard-block">
                     <div class="techcard-block-title">Комплектація</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1mm;margin-bottom:2mm">
-                        @foreach(['Зарядний пристрій', 'Кабель', 'Чохол', 'Захисне скло', 'SIM-карта', 'Карта пам\'яті', 'Сумка', 'Інше'] as $item)
-                        <div class="checklist-item">
-                            <span class="checkbox"></span>
-                            <span style="font-size:10px">{{ $item }}</span>
+                    {{-- Комплектація в квитанції --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5mm">
+                        @foreach([
+                            'charger'     => 'Зарядний пристрій',
+                            'cable'       => 'Кабель',
+                            'case'        => 'Чохол',
+                            'glass'       => 'Захисне скло',
+                            'sim'         => 'SIM-карта',
+                            'memory_card' => 'Карта пам\'яті',
+                            'bag'         => 'Сумка',
+                            'other'       => 'Інше',
+                        ] as $key => $label)
+                        <div style="display:flex;align-items:center;gap:1mm;font-size:9px">
+                            @if(in_array($key, $order->device->equipment ?? []))
+                                <span style="width:3mm;height:3mm;border:1px solid #000;display:inline-block;flex-shrink:0;background:#000;position:relative">
+                                    <span style="position:absolute;top:-1px;left:0;color:white;font-size:8px;font-weight:bold">✓</span>
+                                </span>
+                            @else
+                                <span style="width:3mm;height:3mm;border:1px solid #000;display:inline-block;flex-shrink:0"></span>
+                            @endif
+                            {{ $label }}
                         </div>
                         @endforeach
                     </div>

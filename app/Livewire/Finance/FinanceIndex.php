@@ -15,7 +15,7 @@ class FinanceIndex extends Component
 {
     use WithPagination;
 
-    public string $activeTab = 'income';
+    public string $activeTab = 'all';
     public string $dateFrom = '';
     public string $dateTo = '';
 
@@ -312,12 +312,17 @@ class FinanceIndex extends Component
             ->get()
             ->groupBy('group');
 
+        $all = (clone $baseQuery)
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('id')
+            ->paginate(20, ['*'], 'all_page');
+
         $viewingTransaction = $this->viewingTransactionId
             ? Transaction::with(['account', 'user', 'basis', 'order.client', 'client', 'supplier'])->find($this->viewingTransactionId)
             : null;
 
         return view('livewire.finance.finance-index', compact(
-            'accounts', 'totalBalance',
+            'accounts', 'totalBalance', 'all',
             'income', 'expense', 'transfer',
             'periodIncome', 'periodExpense',
             'incomeBases', 'expenseBases', 'transferBases',

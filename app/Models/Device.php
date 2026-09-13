@@ -18,8 +18,9 @@ class Device extends Model
         'color',
         'appearance',
         'production_year',
+        'equipment',
     ];
-
+    protected $casts = ['equipment' => 'array'];
     // ──────────────────────────────────────────
     // Відносини
     // ──────────────────────────────────────────

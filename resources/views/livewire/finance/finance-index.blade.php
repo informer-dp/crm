@@ -78,7 +78,7 @@
 
     {{-- Вкладки --}}
     <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid #e5e7eb">
-        @foreach(['income' => 'Надходження', 'expense' => 'Витрати', 'transfer' => 'Перекази'] as $tab => $label)
+        @foreach(['all' => 'Журнал', 'income' => 'Надходження', 'expense' => 'Витрати', 'transfer' => 'Перекази'] as $tab => $label)
         <button wire:click="$set('activeTab', '{{ $tab }}')"
                 style="padding:8px 16px;font-size:14px;font-weight:500;border:none;cursor:pointer;border-radius:8px 8px 0 0;
                        {{ $activeTab === $tab ? 'background:#6366f1;color:white;margin-bottom:-2px' : 'background:transparent;color:#6b7280' }}">
@@ -90,6 +90,7 @@
     {{-- Таблиця транзакцій --}}
     @php
         $rows = match($activeTab) {
+            'all'      => $all,
             'income'   => $income,
             'expense'  => $expense,
             default    => $transfer,
@@ -155,7 +156,8 @@
                         {{ $tx->account->name }}
                     </td>
 
-                    <td style="padding:10px 16px;text-align:right;font-weight:bold;font-size:14px;color:{{ $colorMap[$tx->type] ?? '#000' }}">
+                    <td style="padding:10px 16px;text-align:right;font-weight:bold;font-size:14px;
+                            color:{{ $colorMap[$tx->type] ?? '#374151' }}">
                         {{ $signMap[$tx->type] ?? '' }}{{ number_format($tx->amount, 0, '.', ' ') }} ₴
                     </td>
 

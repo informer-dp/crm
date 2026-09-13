@@ -78,6 +78,7 @@ class OrderIndex extends Component
             )
         ->when($this->type, fn($q) => $q->where('type', $this->type))
         ->when($this->priority, fn($q) => $q->where('priority', $this->priority))
+        ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 ELSE 1 END")
         ->orderBy($this->sortBy, $this->sortDir)
         ->paginate(20);
 

@@ -35,6 +35,17 @@ class OrderCreate extends Component
     public string $imei = '';
     public string $color = '';
     public string $appearance = '';
+    public array $equipment = [];
+    public array $equipmentOptions = [
+                                'charger'      => 'Зарядний пристрій',
+                                'cable'        => 'Кабель',
+                                'case'         => 'Чохол',
+                                'glass'        => 'Захисне скло',
+                                'sim'          => 'SIM-карта',
+                                'memory_card'  => 'Карта пам\'яті',
+                                'bag'          => 'Сумка',
+                                'other'        => 'Інше',
+                            ];
 
     // ── Заявка ────────────────────────────────
     public string $type = 'repair';
@@ -250,6 +261,7 @@ class OrderCreate extends Component
             'imei'           => $this->imei ?: null,
             'color'          => $this->color ?: null,
             'appearance'     => $this->appearance ?: null,
+            'equipment'      => !empty($this->equipment) ? $this->equipment : null,
         ]);
 
         $order = Order::create([
