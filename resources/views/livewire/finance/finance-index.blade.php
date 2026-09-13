@@ -73,6 +73,31 @@
                     style="padding:6px 12px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;font-size:13px">
                 Сьогодні
             </button>
+            {{-- Пошук по контрагенту --}}
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+                <input wire:model.live.debounce.300ms="searchCounterparty"
+                    type="text"
+                    style="padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:220px"
+                    placeholder="🔍 Контрагент..."/>
+
+                <select wire:model.live="searchBasisId"
+                        style="padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:260px">
+                    <option value="">Всі статті руху коштів</option>
+                    @foreach($allBases as $group => $items)
+                        <optgroup label="{{ $group }}">
+                            @foreach($items as $basis)
+                                <option value="{{ $basis->id }}">{{ $basis->name }}</option>
+                            @endforeach
+                    @endforeach
+                </select>
+
+                @if($searchCounterparty || $searchBasisId)
+                <button wire:click="$set('searchCounterparty', ''); $set('searchBasisId', null)"
+                        style="padding:6px 12px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;font-size:13px">
+                    ✕ Очистити
+                </button>
+                @endif
+            </div>
         </div>
     </div>
 

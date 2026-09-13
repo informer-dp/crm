@@ -18,6 +18,8 @@ class FinanceIndex extends Component
     public string $activeTab = 'all';
     public string $dateFrom = '';
     public string $dateTo = '';
+    public string $searchCounterparty = '';
+    public ?int $searchBasisId = null;
 
     // ── Форма нової транзакції ────────────────
     public bool $showTransactionForm = false;
@@ -52,6 +54,9 @@ class FinanceIndex extends Component
     public string $editDescription = '';
     public string $editDate = '';
     public ?int $editBasisId = null;
+
+    public function updatingSearchCounterparty(): void { $this->resetPage(); }
+    public function updatingSearchBasisId(): void { $this->resetPage(); }
 
     public function mount(): void
     {
@@ -285,7 +290,20 @@ class FinanceIndex extends Component
         $totalBalance = $accounts->sum('balance');
 
         $baseQuery = Transaction::with(['account', 'user', 'basis', 'order.client', 'client', 'supplier'])
-            ->whereBetween('transaction_date', [$this->dateFrom, $this->dateTo]);
+            ->whereBetween('transaction_date', [$this->dateFrom, $this->dateTo])
+            ->when($this->searchBasisId, fn($q) => $q->where('basis_id', $this->searchBasisId))
+            ->when($this->searchCounterparty, fn($q) =>
+                $q->where(function($q2) {
+                    $q2->whereHas('client', fn($c) =>
+                            $c->where('name', 'like', '%' . $this->searchCounterparty . '%')
+                            ->orWhere('phone', 'like', '%' . $this->searchCounterparty . '%')
+                        )
+                    ->orWhereHas('supplier', fn($s) =>
+                            $s->where('name', 'like', '%' . $this->searchCounterparty . '%')
+                        )
+                    ->orWhere('counterparty_name', 'like', '%' . $this->searchCounterparty . '%');
+                })
+            );
 
         $income = (clone $baseQuery)->where('type', 'income')
             ->orderByDesc('transaction_date')->orderByDesc('id')
